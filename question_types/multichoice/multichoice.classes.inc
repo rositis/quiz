@@ -107,7 +107,7 @@ class MultichoiceQuestion extends QuizQuestion {
    * @see QuizQuestion::saveNodeProperties()
    */
   public function saveNodeProperties($is_new = FALSE) {
-    $is_new = $is_new || $this->node->revision == 1;
+    $is_new = $is_new || !empty($this->node->revision);
 
     // Before we save we forgive some possible user errors.
     $this->forgive();
