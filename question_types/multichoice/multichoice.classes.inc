@@ -656,6 +656,23 @@ class MultichoiceQuestion extends QuizQuestion {
         '#attributes' => array('class' => array('multichoice-alternative-weight')),
         '#default_value' => isset($this->node->alternatives[$i]['weight']) ? $this->node->alternatives[$i]['weight'] : $i,
       );
+
+      // Add remove button.
+      $form['alternatives'][$i]['remove_button'] = array(
+        '#delta' => $i,
+        '#name' => 'alternatives__' . $i . '__remove_button',
+        '#type' => 'submit',
+        '#value' => t('Remove'),
+        '#validate' => array(),
+        '#submit' => array('multichoice_remove_alternative_submit'),
+        '#limit_validation_errors' => array(),
+        '#ajax' => array(
+          'callback' => 'multichoice_remove_alternative_ajax_callback',
+          'effect' => 'fade',
+          'wrapper' => 'multichoice-alternatives-wrapper'
+        ),
+        '#weight' => 1000,
+      );
     }
 
     $form['alternatives']['multichoice_add_alternative'] = array(

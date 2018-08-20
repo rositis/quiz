@@ -15,7 +15,10 @@ foreach (element_children($form) as $key) {
           'width' => 35,
           'data' => drupal_render($form[$key]['correct']),
         ),
-        drupal_render($form[$key]['answer']) . drupal_render($form[$key]['advanced']),
+        drupal_render($form[$key]['answer'])
+        . drupal_render($form[$key]['advanced'])
+        . drupal_render($form[$key]['remove_button'])
+        . theme('status_messages'),
         drupal_render($form[$key]['weight']),
       ),
       'class' => array('draggable'),

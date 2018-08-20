@@ -314,4 +314,36 @@ class MultichoiceTestCase extends QuizQuestionTestCase {
     ), t('Next'));
   }
 
+  /**
+   * Test that alternatives can be removed.
+   */
+  public function testRemoveAlternative() {
+    $this->drupalLogin($this->admin);
+    $question_node = $this->testCreateQuizQuestion();
+    $this->drupalGet("node/$question_node->nid/edit");
+    $this->drupalPost(NULL, array(
+      'alternatives[0][answer][value]' => 'Correct answer 1',
+      'alternatives[0][weight]' => 1,
+      'alternatives[1][answer][value]' => 'Incorrect answer 2',
+      'alternatives[1][weight]' => 2,
+      'alternatives[2][answer][value]' => 'Incorrect answer 3',
+      'alternatives[2][weight]' => 3,
+    ), t('Save'));
+
+    $this->drupalGet("node/$question_node->nid/edit");
+
+    $this->assertText('Correct answer 1');
+    $this->assertText('Incorrect answer 2');
+    $this->assertText('Incorrect answer 3');
+
+    $this->drupalPostAJAX(NULL, array(), array('alternatives__2__remove_button' => t('Remove')));
+    $this->drupalPost(NULL, array(), t('Save'));
+
+    $this->drupalGet("node/$question_node->nid");
+
+    $this->assertText('Correct answer 1');
+    $this->assertText('Incorrect answer 2');
+    $this->assertNoText('Incorrect answer 3');
+  }
+
 }
