@@ -4075,13 +4075,6 @@ function quiz_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
       '#description' => t('If checked, this field will be presented when starting a course.'),
     );
   }
-  else {
-    // Add the value to the form so it isn't lost.
-    $form['instance']['settings']['quiz_result'] = array(
-      '#type' => 'value',
-      '#value' => !empty($form['#instance']['settings']['quiz_result']),
-    );
-  }
 }
 
 /**
