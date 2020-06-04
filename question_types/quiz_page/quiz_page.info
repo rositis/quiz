@@ -1,8 +1,7 @@
 name = Quiz - Pages
+type = module
 package = Quiz core
 description = Provides support for pages of questions.
-core = 7.x
+backdrop = 1.x
 dependencies[] = quiz
 dependencies[] = quiz_question
-files[] = quiz_page.classes.inc
-files[] = QuizPageTestCase.test

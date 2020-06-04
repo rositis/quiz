@@ -9,12 +9,27 @@
  */
 
 /**
- * Implements hook_help().
+ * Implements hook_autoload_info*().
+ *
+ * @return string[]
  */
-function quiz_page_help($path, $args) {
-  if ($path == 'admin/help#quiz_pages') {
-    return t('Provides pages which can contain questions in a quiz.');
-  }
+function quiz_page_autoload_info() {
+  return array(
+    'QuizPageQuestion' => 'includes/QuizPageQuestion.class.inc',
+    'QuizPageResponse' => 'includes/QuizPageResponse.class.inc',
+    'QuizPageTestCase' => 'tests/QuizPageTestCase.test',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function quiz_page_config_info() {
+  $prefixes['quiz_page.settings'] = array(
+    'label' => t('Quiz Page settings'),
+    'group' => t('Quiz Page'),
+  );
+  return $prefixes;
 }
 
 /**
