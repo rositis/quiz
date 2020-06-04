@@ -9,12 +9,29 @@
  */
 
 /**
- * Implements hook_help().
+ * Implements hook_autoload_info().
+ *
+ * @return string[]
  */
-function quiz_question_help($path, $args) {
-  if ($path == 'admin/help#quiz_quesion') {
-    return t('Support for Quiz question types.');
-  }
+function quiz_question_autoload_info() {
+  return array(
+    'QuizQuestion'         => 'includes/QuizQuestion.class.inc',
+    'QuizQuestionResponse' => 'includes/QuizQuestionResponse.class.inc',
+    'QuizQuestionBroken'   => 'includes/QuizQuestionBroken.class.inc',
+    'QuizQuestionResponseBroken' => 'includes/QuizQuestionResponseBroken.class.inc',
+    'QuizQuestionTestCase' => 'tests/QuizQuestionTestCase.test',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function quiz_question_config_info() {
+  $prefixes['quiz_question.settings'] = array(
+    'label' => t('Quiz Question settings'),
+    'group' => t('Quiz Question'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -24,7 +41,7 @@ function quiz_question_menu() {
   $items = array();
   $items['node/%node/question-revision-actions'] = array(
     'title' => 'Revision actions',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('quiz_question_revision_actions_form', 1),
     'access callback' => 'node_access',
     'access arguments' => array('update', 1),
@@ -35,7 +52,7 @@ function quiz_question_menu() {
   $items['admin/quiz/settings/questions_settings'] = array(
     'title' => 'Question configuration',
     'description' => 'Configure the question types.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('quiz_question_config'),
     'access arguments' => array('administer quiz configuration'),
     'type' => MENU_NORMAL_ITEM,
@@ -115,7 +132,7 @@ function quiz_question_node_form_submit($form, &$form_state) {
     // '?destination' that's set.
     unset($_GET['destination']);
     unset($_REQUEST['edit']['destination']);
-    $form_state['redirect'] = array('node/' . $node->nid . '/question-revision-actions', array('query' => drupal_get_destination()));
+    $form_state['redirect'] = array('node/' . $node->nid . '/question-revision-actions', array('query' => backdrop_get_destination()));
   }
 }
 
@@ -175,7 +192,7 @@ function quiz_question_answering_form($form, $form_state, $nodes, $result_id) {
 
   foreach ($nodes as $node) {
     $question = _quiz_question_get_instance($node);
-    $class = drupal_html_class('quiz-question-' . $node->type);
+    $class = backdrop_html_class('quiz-question-' . $node->type);
     // Element for a single question.
     $element = $question->getAnsweringForm($form_state, $result_id);
     $qra = quiz_result_answer_load($quiz_result->result_id, $node->nid, $node->vid);
@@ -203,7 +220,7 @@ function quiz_question_answering_form($form, $form_state, $nodes, $result_id) {
         // disabled.
         $form['question'][$node->nid]['#disabled'] = TRUE;
         if (empty($form_state['input'])) {
-          drupal_set_message(t('Changing answers is disabled.'), 'warning');
+          backdrop_set_message(t('Changing answers is disabled.'), 'warning');
         }
       }
     }
@@ -260,7 +277,7 @@ function quiz_question_answering_form($form, $form_state, $nodes, $result_id) {
     $form['#attributes']['class'][] = 'quiz-answer-confirm';
     $form['#attributes']['data-confirm-message'] = t("By proceeding you won't be able to go back and edit your answers.");
     $form['#attached'] = array(
-      'js' => array(drupal_get_path('module', 'quiz') . '/theme/quiz_confirm.js'),
+      'js' => array(backdrop_get_path('module', 'quiz') . '/theme/quiz_confirm.js'),
     );
   }
   if ($quiz->allow_skipping) {
@@ -302,12 +319,14 @@ function quiz_question_answering_form_submit_blank($form, &$form_state) {
 
       // Mark our question attempt as skipped, reset the correct and points
       // flag.
-      $qra = quiz_result_answer_load($quiz_result->result_id, $question->nid, $question->vid);
+      $qra = entity_load('quiz_result_answer', $quiz_result->result_id);
+      // $qra = quiz_result_answer_load($quiz_result->result_id, $question->nid, $question->vid);
       $qra->is_skipped = 1;
       $qra->is_correct = 0;
       $qra->points_awarded = 0;
       $qra->answer_timestamp = REQUEST_TIME;
-      entity_save('quiz_result_answer', $qra);
+      $qra->save();
+      // entity_save('quiz_result_answer', $qra);
       quiz_question_goto($quiz, $_SESSION['quiz'][$quiz->nid]['current'] + 1);
     }
   }
@@ -364,7 +383,7 @@ function quiz_question_quiz_question_score($quiz, $question_nid, $question_vid =
   $dummy_node->nid = $question_nid;
   $dummy_node->vid = $question_vid;
 
-  $question = _quiz_question_get_instance($dummy_node, TRUE);
+  $question = _quiz_question_get_instance($dummy_node);
   if (!$question) {
     return FALSE;
   }
@@ -385,10 +404,16 @@ function quiz_question_quiz_question_score($quiz, $question_nid, $question_vid =
 
 /**
  * Get the configuration form for all enabled question types.
+ *
+ * @param $form
+ * @param $context
+ *
+ * @return mixed
  */
 function quiz_question_config($form, $context) {
   $q_types = quiz_question_get_info();
   $form = array();
+  $form['#config'] = 'modulename.settings';
   $form['#validate'] = array();
   // Go through all question types and merge their config forms.
   foreach ($q_types as $type => $values) {
@@ -427,14 +452,15 @@ function quiz_question_node_revision_delete($node) {
  * Implements hook_node_presave().
  */
 function quiz_question_node_presave($node) {
+  $config = config('quiz.settings');
   $q_types = quiz_question_get_info();
   foreach ($q_types as $q_type => $info) {
     if ($node->type == $q_type) {
-      if (drupal_strlen($node->title) == 0) {
+      if (backdrop_strlen($node->title) == 0) {
         $body = field_view_field('node', $node, 'body', array('label' => 'hidden'));
-        $markup = strip_tags(drupal_render($body));
-        if (drupal_strlen($markup) > variable_get('quiz_autotitle_length', 50)) {
-          $node->title = drupal_substr($markup, 0, variable_get('quiz_autotitle_length', 50) - 3) . '...';
+        $markup = strip_tags(backdrop_render($body));
+        if (backdrop_strlen($markup) > $config->get('quiz_autotitle_length')) {
+          $node->title = backdrop_substr($markup, 0, $config->get('quiz_autotitle_length') - 3) . '...';
         }
         else {
           $node->title = $markup;
@@ -554,7 +580,7 @@ function _quiz_delete_question($node, $only_this_version) {
  */
 function quiz_question_load($nodes) {
   foreach ($nodes as $nid => &$node) {
-    $node_additions = _quiz_question_get_instance($node, TRUE) ? _quiz_question_get_instance($node, TRUE)->getNodeProperties() : array();
+    $node_additions = _quiz_question_get_instance($node) ? _quiz_question_get_instance($node)->getNodeProperties() : array();
     foreach ($node_additions as $property => &$value) {
       $node->$property = $value;
     }
@@ -634,7 +660,7 @@ function _quiz_question_response_get_instance($result_id, $question, $answer = N
   $to_return = new $constructor($result_id, $question, $answer);
   // All response classes must extend QuizQuestionResponse.
   if (!($to_return instanceof QuizQuestionResponse)) {
-    drupal_set_message(t("The question-response isn't a QuizQuestionResponse. It needs to extend the QuizQuestionResponse interface, or extend the abstractQuizQuestionResponse class."), 'error', FALSE);
+    backdrop_set_message(t("The question-response isn't a QuizQuestionResponse. It needs to extend the QuizQuestionResponse interface, or extend the abstractQuizQuestionResponse class."), 'error', FALSE);
   }
 
   $result = $to_return->getReport();
@@ -659,7 +685,7 @@ function _quiz_question_response_get_instance($result_id, $question, $answer = N
  * @see quiz_question_quiz_question_info() for an example of a quiz question info hook.
  */
 function quiz_question_get_info($name = NULL, $reset = FALSE) {
-  $info = &drupal_static(__FUNCTION__, array());
+  $info = &backdrop_static(__FUNCTION__, array());
   if (empty($info) || $reset) {
     $qtypes = module_invoke_all('quiz_question_info');
     foreach ($qtypes as $type => $definition) {
@@ -669,7 +695,7 @@ function quiz_question_get_info($name = NULL, $reset = FALSE) {
         $info[$type] = $definition;
       }
     }
-    drupal_alter('quiz_question_info', $info);
+    backdrop_alter('quiz_question_info', $info);
   }
   return NULL === $name ? $info : $info[$info];
 }
@@ -746,6 +772,9 @@ function quiz_question_add_body_field($type) {
  *
  * There is no validation code here, but there may be feedback code for
  * correct feedback.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_question_answering_form_submit(&$form, &$form_state) {
   $feedback_count = 0;
@@ -758,7 +787,7 @@ function quiz_question_answering_form_submit(&$form, &$form_state) {
     // @todo move to quiz_question_answering_form_validate(), and then put all
     // the "quiz end" logic in a sharable place. We just need to not fire the
     // logic that saves all the users answers.
-    drupal_set_message(t('The last answer was not submitted, as the time ran out.'), 'error');
+    backdrop_set_message(t('The last answer was not submitted, as the time ran out.'), 'error');
   }
   else {
     $questions = $quiz_result->getLayout();
@@ -809,6 +838,9 @@ function quiz_question_answering_form_submit(&$form, &$form_state) {
  *
  * @see quiz_question_answering_form_submit()
  * @see quiz_question_answering_form_submit_blank()
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_question_answering_form_finalize(&$form, &$form_state) {
   $quiz_result = quiz_result_load($_SESSION['quiz'][$form['#quiz']['nid']]['result_id']);
@@ -945,7 +977,7 @@ function quiz_question_element_validate(&$element, &$form_state) {
   if ($quiz->repeat_until_correct && !$result->isCorrect() && $result->isEvaluated()) {
     form_set_error('', t('The answer was incorrect. Please try again.'));
     // Show feedback after incorrect answer.
-    $qra = entity_load_single('quiz_result_answer', $result->result_answer_id);
+    $qra = entity_load('quiz_result_answer', $result->result_answer_id);
     // Load the temporary answer to the result answer entity.
     $qra->instance = $result;
     $element['feedback'] = $qra->view();
@@ -955,12 +987,22 @@ function quiz_question_element_validate(&$element, &$form_state) {
 
 /**
  * Theme the feedback for any question type.
+ *
+ * @param $variables
+ *
+ * @return string
  */
 function theme_quiz_question_feedback($variables) {
   $rows = $variables['data'];
   $headers = array_intersect_key($variables['labels'], $rows[0]);
-
-  return theme('table', array('header' => $headers, 'rows' => $rows));
+  $output = '';
+  try {
+    $outpot = theme('table', array('header' => $headers, 'rows' => $rows));
+  }
+  catch (Exception $e) {
+    watchdog('Quiz Question', $e->getMessage());
+  }
+  return $output;
 }
 
 /**

@@ -96,6 +96,9 @@ function quiz_question_revision_actions_form($form, $form_state, $question_node)
 
 /**
  * Submit callback for the revision actions page.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_question_revision_actions_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'node/' . $form_state['values']['question_node']->nid;
@@ -119,17 +122,17 @@ function quiz_question_revision_actions_form_submit($form, &$form_state) {
     if ($actions['revise'] == 'revise') {
       $result = quiz_set_questions($quiz_node, $questions, TRUE);
       if ($result) {
-        drupal_set_message(t('Quiz %title succesfully revised.', array('%title' => $quiz_node->title)), 'status');
+        backdrop_set_message(t('Quiz %title succesfully revised.', array('%title' => $quiz_node->title)), 'status');
       }
     }
     elseif ($actions['revise'] == 'update') {
       $result = quiz_set_questions($quiz_node, $questions, FALSE);
       if ($result) {
-        drupal_set_message(t('Quiz %title succesfully updated.', array('%title' => $quiz_node->title)), 'status');
+        backdrop_set_message(t('Quiz %title succesfully updated.', array('%title' => $quiz_node->title)), 'status');
       }
     }
     else {
-      drupal_set_message(t('Quiz not updated, please use the Quiz question listing to if you decide to update the quiz manually.', array('%title' => $quiz_node->title)), 'status');
+      backdrop_set_message(t('Quiz not updated, please use the Quiz question listing to if you decide to update the quiz manually.', array('%title' => $quiz_node->title)), 'status');
     }
   }
 }

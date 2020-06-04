@@ -59,75 +59,14 @@ function quiz_question_schema() {
  */
 
 /**
- * Make the question body visible by default for the question view mode.
+ * Move Quiz Question settings from variables to config.
  */
-function quiz_question_update_7401() {
-  $question_types = array_keys(quiz_question_get_info());
-
-  foreach ($question_types as $question_type) {
-    $instance = field_read_instance('node', 'body', $question_type);
-
-    $instance['display']['question'] = array(
-      'label' => 'hidden',
-      'type' => 'text_default',
-      'weight' => 1,
-      'settings' => array(),
-      'module' => 'text',
-    );
-
-    field_update_instance($instance);
-  }
-}
+function quiz_question_update_1000() {}
 
 /**
- * Add fields for general question feedback.
+ * Implements hook_update_last_removed().
  */
-function quiz_question_update_7500() {
-  db_drop_primary_key('quiz_question_properties');
-
-  db_add_field('quiz_question_properties', 'qqp_id', array(
-    'type' => 'serial',
-    'not null' => TRUE,
-  ), array('primary key' => array('qqp_id')));
-
-  db_add_field('quiz_question_properties', 'feedback', array(
-    'type' => 'text',
-    'not null' => FALSE,
-  ));
-
-  db_add_field('quiz_question_properties', 'feedback_format', array(
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => FALSE,
-  ));
-
-  if (module_exists('truefalse')) {
-    // Migrate the truefalse feedback, since we have generic feedback now.
-    $filter = filter_default_format();
-    db_query("UPDATE {quiz_question_properties} qqp
-    INNER JOIN {quiz_truefalse_node} qtn ON (qtn.vid = qqp.vid)
-    SET qqp.feedback = qtn.feedback, qqp.feedback_format = :format", array(':format' => $filter));
-
-    // Drop old field.
-    db_drop_field('quiz_truefalse_node', 'feedback');
-  }
-
-  return t('Added global quiz question feedback fields and migrated true/false feedback.');
+function quiz_question_update_last_removed() {
+  return 7502;
 }
 
-/**
- * Drop table {quiz_question_latest_quizzes}.
- */
-function quiz_question_update_7501() {
-  db_drop_table('quiz_question_latest_quizzes');
-  return t('Dropped table {quiz_question_latest_quizzes}');
-}
-
-/**
- * Add missing question_id index.
- */
-function quiz_question_update_7502() {
-  if (!db_index_exists('quiz_question_properties', 'question_id')) {
-    db_add_index('quiz_question_properties', 'question_id', array('vid', 'nid'));
-  }
-}

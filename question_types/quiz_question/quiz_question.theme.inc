@@ -21,6 +21,4 @@ function theme_quiz_question_creation_form($variables) {
  *
  * @param array $variables
  */
-function theme_quiz_question_navigation_form($variables) {
-
-}
+function theme_quiz_question_navigation_form($variables) {}
