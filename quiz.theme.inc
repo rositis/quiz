@@ -9,6 +9,10 @@
  * Pass the correct mark to the theme so that theme authors can use an image.
  *
  * @ingroup themeable
+ *
+ * @param $variables
+ *
+ * @return string
  */
 function theme_quiz_answer_result($variables) {
   $options = array();
@@ -61,32 +65,33 @@ function theme_quiz_answer_result($variables) {
   }
 
   if (!empty($options['path'])) {
-    $options['path'] = drupal_get_path('module', 'quiz') . '/images/' . $options['path'];
+    $options['path'] = backdrop_get_path('module', 'quiz') . '/images/' . $options['path'];
   }
   if (!empty($options['alt'])) {
     $options['title'] = $options['alt'];
   }
-
-  $image = theme('image', $options);
+  $image = '';
+  try {
+    $image = theme('image', $options);
+  }
+  catch (Exception $e) {
+    watchdog('Quiz', $e->getMessage());
+  }
   return '<div class="quiz-score-icon ' . $type . '">' . $image . '</div>';
 }
 
 /**
  * Theme a progress indicator for use during a quiz.
  *
- * @param $question_number
- *   The position of the current question in the sessions' array.
- * @param $num_of_question
- *   The number of questions for this quiz as returned by
- *   quiz_get_number_of_questions().
+ * @param $variables
  *
- * @return
+ * @return string
  *   Themed html.
  *
  * @ingroup themeable
  */
 function theme_quiz_progress($variables) {
-  drupal_add_js(drupal_get_path('module', 'quiz') . '/js/quiz.jumper.js');
+  backdrop_add_js(backdrop_get_path('module', 'quiz') . '/js/quiz.jumper.js');
   $output = '';
   $output .= '<div id="quiz-progress">';
   $text = 'Page <span id="quiz-question-number">!x</span> of <span id="quiz-num-questions">@y</span>';
@@ -94,15 +99,21 @@ function theme_quiz_progress($variables) {
   if ($variables['allow_jumping']) {
     // Show jump form.
     if ($variables['pager']) {
-      $output .= theme('quiz_pager', array(
-        'siblings' => variable_get('quiz_pager_siblings', 5),
-        'current' => $variables['current'],
-        'total' => count($variables['questions']),
-      ));
+      try {
+        $output .= theme('quiz_pager', array(
+          'siblings' => config_get('quiz.settings','quiz_pager_siblings'),
+          'current' => $variables['current'],
+          'total' => count($variables['questions']),
+        ));
+      }
+      catch (Exception $e) {
+        watchdog('Quiz', $e->getMessage());
+      }
+
     }
     else {
-      $selectbox = drupal_get_form('quiz_jumper_form', $variables['questions'], $variables['current']);
-      $output .= t($text, array('!x' => drupal_render($selectbox), '@y' => count($variables['questions'])));
+      $selectbox = backdrop_get_form('quiz_jumper_form', $variables['questions'], $variables['current']);
+      $output .= t($text, array('!x' => backdrop_render($selectbox), '@y' => count($variables['questions'])));
     }
   }
   else {
@@ -117,8 +128,9 @@ function theme_quiz_progress($variables) {
 /**
  * Theme the stats on the views page.
  *
- * @param $node
- *   The quiz node.
+ * @param $variables
+ *
+ * @return string
  */
 function theme_quiz_view_stats($variables) {
   $node = $variables['node'];
@@ -168,17 +180,30 @@ function theme_quiz_view_stats($variables) {
     array('header' => TRUE, 'data' => t('Backwards navigation')),
     $node->backwards_navigation ? t('Allowed') : t('Forbidden'),
   );
-
-  return theme('table', array('attributes' => array('id' => 'quiz-view-table'), 'rows' => $stats));
+  $output = '';
+  try {
+    $output = theme('table', array('attributes' => array('id' => 'quiz-view-table'), 'rows' => $stats));
+  }
+  catch (Exception $e) {
+    watchdog('Quiz', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
  * Help us with special pagination.
  *
- * Why not the Drupal theme_pager()?
+ * Why not the backdrop theme_pager()?
  *
  * It uses query strings. We have access on each menu argument (quiz question
  * number) so we unfortunately cannot use it.
+ *
+ * @param $total
+ * @param null $perpage
+ * @param null $current
+ * @param null $siblings
+ *
+ * @return array
  */
 function _quiz_pagination_helper($total, $perpage = NULL, $current = NULL, $siblings = NULL) {
   $result = array();
@@ -198,6 +223,10 @@ function _quiz_pagination_helper($total, $perpage = NULL, $current = NULL, $sibl
 
 /**
  * Theme the quiz pager.
+ *
+ * @param $variables
+ *
+ * @return string
  */
 function theme_quiz_pager($variables) {
   $total = $variables['total'];
@@ -227,11 +256,22 @@ function theme_quiz_pager($variables) {
     'class' => array('pager-last'),
     'data' => l(t('last'), "node/$nid/take/$total"),
   );
-  return theme('item_list', array('items' => $items, 'attributes' => array('class' => array('pager'))));
+  $output = '';
+  try {
+    $output = theme('item_list', array('items' => $items, 'attributes' => array('class' => array('pager'))));
+  }
+  catch (Exception $e) {
+    watchdog('Quiz', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
  * Themes a categorized quiz form.
+ *
+ * @param $variables
+ *
+ * @return string
  */
 function theme_quiz_categorized_form($variables) {
   $form = $variables['form'];
@@ -242,11 +282,11 @@ function theme_quiz_categorized_form($variables) {
       continue;
     }
     $cols = array();
-    $cols[] = drupal_render($existing['name']);
-    $cols[] = drupal_render($existing['number']);
-    $cols[] = drupal_render($existing['max_score']);
-    $cols[] = drupal_render($existing['remove']);
-    $cols[] = drupal_render($existing['weight']);
+    $cols[] = backdrop_render($existing['name']);
+    $cols[] = backdrop_render($existing['number']);
+    $cols[] = backdrop_render($existing['max_score']);
+    $cols[] = backdrop_render($existing['remove']);
+    $cols[] = backdrop_render($existing['weight']);
     $rows[] = array(
       'data' => $cols,
       'class' => array('draggable'),
@@ -260,17 +300,22 @@ function theme_quiz_categorized_form($variables) {
       t('Remove'),
       t('Weight'),
     );
-    drupal_add_tabledrag('existing-terms', 'order', 'sibling', 'term-weight', NULL, NULL, TRUE);
-    $output .= theme('table', array(
-      'header' => $header,
-      'rows' => $rows,
-      'attributes' => array('id' => 'existing-terms'),
-    ));
+    backdrop_add_tabledrag('existing-terms', 'order', 'sibling', 'term-weight', NULL, NULL, TRUE);
+    try {
+      $output .= theme('table', [
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => ['id' => 'existing-terms'],
+      ]);
+    }
+    catch (Exception $e) {
+      watchdog('Quiz', $e->getMessage());
+    }
   }
-  $output .= drupal_render_children($form);
-  drupal_add_js(
+  $output .= backdrop_render_children($form);
+  backdrop_add_js(
     "(function ($) {
-     Drupal.behaviors.quiz_categorized = {
+     backdrop.behaviors.quiz_categorized = {
      attach: function(context) {
       $('#browse-for-term:not(.quiz-processed)').click(function(event) {
         event.preventDefault();
@@ -288,11 +333,16 @@ function theme_quiz_categorized_form($variables) {
 
 /**
  * Theme a question selection table, adding drag and drop support.
+ *
+ * @param $variables
+ *
+ * @return string
+ * @throws \Exception
  */
 function theme_question_selection_table($variables) {
   $form = $variables['form'];
-  drupal_add_tabledrag('question-list', 'match', 'parent', 'qnr-pid', 'qnr-pid', 'qnr-id', TRUE, 1);
-  drupal_add_tabledrag('question-list', 'order', 'sibling', 'question-list-weight');
+  backdrop_add_tabledrag('question-list', 'match', 'parent', 'qnr-pid', 'qnr-pid', 'qnr-id', TRUE, 1);
+  backdrop_add_tabledrag('question-list', 'order', 'sibling', 'question-list-weight');
 
   // Building headers.
   $headers = array(
@@ -334,23 +384,32 @@ function theme_question_selection_table($variables) {
   if (isset($form['no_questions'])) {
     $html_attr['style'] = "display:none;";
   }
+  $table = '';
+  try {
+    $table = theme('table', [
+      'header' => $headers,
+      'rows' => $rows,
+      'attributes' => $html_attr
+    ]);
+  }
+  catch (Exception $e) {
+    watchdog('Quiz', $e->getMessage());
+  }
 
-  $table = theme('table', array(
-    'header' => $headers,
-    'rows' => $rows,
-    'attributes' => $html_attr
-  ));
-
-  return drupal_render($form['random_settings'])
+  return backdrop_render($form['random_settings'])
     . $table
-    . drupal_render_children($form);
+    . backdrop_render_children($form);
 }
 
 /**
  * Theme the quiz questions admin page.
+ *
+ * @param $variables
+ *
+ * @return mixed
  */
 function theme_quiz_questions_page($variables) {
   // Set page title.
-  drupal_set_title($variables['node']->title);
+  backdrop_set_title($variables['node']->title);
   return $variables['form'];
 }
