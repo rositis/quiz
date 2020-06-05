@@ -8,20 +8,27 @@
  */
 
 /**
- * Implements hook_help().
+ * Implements hook_autoload_info().
+ *
+ * @return string[]
  */
-function truefalse_help($path, $args) {
-  switch ($path) {
-    case 'admin/modules#description':
-      return t('TrueFalse question type for the quiz module.');
+function truefalse_autoload_info() {
+  return array(
+    'TrueFalseQuestion' => 'includes/TrueFalseQuestion.class.inc',
+    'TrueFalseQuestionResponse' => 'includes/TrueFalseQuestionResponse.class.inc',
+    'TrueFalseTestCase' => 'tests/truefalse.inc',
+  );
+}
 
-    case 'node/add#truefalse':
-    case 'admin/help#truefalse':
-      return t('A question type for the quiz module. A simplified version of multichoice where "true" and "false" are the alternatives.');
-
-    default:
-      break;
-  }
+/**
+ * Implements hook_config_info().
+ */
+function truefalse_config_info() {
+  $prefixes['modulename.first_set_of.settings'] = array(
+    'label' => t('TrueFalse settings'),
+    'group' => t('TrueFalse'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -54,7 +61,7 @@ function truefalse_theme() {
   return array(
     'truefalse_answering_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'truefalse') . '/theme',
+      'path' => backdrop_get_path('module', 'truefalse') . '/theme',
       'template' => 'truefalse-answering-form',
     ),
     'truefalse_response' => array(
@@ -77,7 +84,14 @@ function truefalse_theme() {
 function theme_truefalse_response($variables) {
   $metadata = $variables['metadata'];
   $data = $variables['data'];
-  return theme('table', array('header' => $metadata, 'rows' => $data));
+  $output = '';
+  try {
+    $output = theme('table', array('header' => $metadata, 'rows' => $data));
+  }
+  catch (Exception $e) {
+    watchdog('TrueFalse', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
