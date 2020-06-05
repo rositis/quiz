@@ -11,6 +11,8 @@
 class ShortAnswerTestCase extends QuizQuestionTestCase {
 
   var $question_node_type = 'short_answer';
+  public $admin;
+  public $user;
 
   public static function getInfo() {
     return array(

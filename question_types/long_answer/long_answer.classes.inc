@@ -116,9 +116,14 @@ class LongAnswerQuestion extends QuizQuestion {
    * Implementation of getAnsweringForm().
    *
    * @see QuizQuestion::getAnsweringForm()
+   *
+   * @param array|null $form_state
+   * @param int $result_id
+   *
+   * @return array
    */
-  public function getAnsweringForm(array $form_state = NULL, $result_id) {
-    $element = parent::getAnsweringForm($form_state, $result_id);
+  public function getAnsweringForm($result_id, array $form_state = NULL) {
+    $element = parent::getAnsweringForm($result_id, $form_state);
 
     $element += array(
       '#title' => t('Answer'),

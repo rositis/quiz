@@ -10,12 +10,27 @@
  */
 
 /**
- * Implements hook_help().
+ * Implementation of hook_autoload_info().
+ *
+ * @return string[]
  */
-function short_answer_help($path, $args) {
-  if ($path == 'admin/help#short_answer') {
-    return t('This module provides a short answer question type for Quiz.');
-  }
+function short_answer_autoload_info() {
+  return array(
+    'ShortAnswerQuestion' => 'includes/ShoreAnswerQuestion.class.inc',
+    'ShortAnswerResponse' => 'includes/ShortAnswerResponse.class.inc',
+    'ShortAnswerTestCase' => 'tests/shortanswer.test',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function contact_config_info() {
+  $prefixes['short_answer.settings'] = array(
+    'label' => t('Short Answer settings'),
+    'group' => t('Short Answer'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -51,11 +66,12 @@ function short_answer_quiz_question_info() {
  * Implements hook_quiz_question_config().
  */
 function short_answer_quiz_question_config() {
+  $config = config('short_answer.settings');
   $form['short_answer_default_max_score'] = array(
     '#type' => 'textfield',
     '#title' => t('Default max score'),
     '#description' => t('Choose the default maximum score for a short answer question.'),
-    '#default_value' => variable_get('short_answer_default_max_score', 5),
+    '#default_value' => $config->get('short_answer_default_max_score'),
   );
   $form['#validate'][] = 'short_answer_config_validate';
   return $form;
@@ -74,7 +90,7 @@ function short_answer_config_validate($form, $form_state) {
  * Implements hook_theme().
  */
 function short_answer_theme($existing, $type, $theme, $path) {
-  $module_path = drupal_get_path('module', 'short_answer');
+  $module_path = backdrop_get_path('module', 'short_answer');
   return array(
     'short_answer_response_form' => array(
       'render element' => 'form',
@@ -106,6 +122,11 @@ function short_answer_theme($existing, $type, $theme, $path) {
  *   The FAPI $form_state['values'].
  * @param bool $update_total
  *   Shall the total score be updated?
+ *
+ * @throws \EntityStorageException
+ * @throws \InvalidMergeQueryException
+ *
+ * TODO: Handle exceptions.
  */
 function short_answer_score_an_answer($values, $update_total = TRUE) {
   $nid = $values['nid'];
@@ -131,7 +152,7 @@ function short_answer_score_an_answer($values, $update_total = TRUE) {
 
   // Now the user data has been updated. We also need to update the data in the
   // quiz tables.
-  $quiz_result_answer = entity_load_single('quiz_result_answer', $quiz_question_response->result_answer_id);
+  $quiz_result_answer = entity_load('quiz_result_answer', $quiz_question_response->result_answer_id);
   $quiz_result_answer->points_awarded = $score;
   $quiz_result_answer->is_correct = $quiz_question_response->isCorrect();
   $quiz_result_answer->save();
@@ -147,6 +168,11 @@ function short_answer_score_an_answer($values, $update_total = TRUE) {
  *
  * @param array $values
  *   The FAPI $form_state['values'].
+ *
+ * @throws \EntityStorageException
+ * @throws \InvalidMergeQueryException
+ *
+ * TODO: Handle exceptions.
  */
 function short_answer_report_submit($values) {
   short_answer_score_an_answer($values, FALSE);

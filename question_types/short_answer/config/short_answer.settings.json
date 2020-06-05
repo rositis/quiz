@@ -1,0 +1,7 @@
+{
+    "_config_name": "short_answer.settings",
+    "short_answer_default_max_score": 5,
+    "node_options_short_answere": [
+        "status"
+    ]
+}

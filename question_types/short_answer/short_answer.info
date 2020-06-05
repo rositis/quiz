@@ -1,9 +1,7 @@
 name = Quiz - Short answer
+type = module
 package = Quiz question
 description = Short answer question type for Quiz.
-core = 7.x
+backdrop = 1.x
 dependencies[] = quiz
 dependencies[] = quiz_question
-
-files[] = short_answer.classes.inc
-files[] = short_answer.test

@@ -18,7 +18,14 @@ function theme_short_answer_user_answer($variables) {
   $correct = $variables['correct'];
   $header = array(t('Correct Answer'), t('User Answer'));
   $row = array(array($correct, $answer));
-  return theme('table', array('header' => $header, 'rows' => $row));
+  $output = '';
+  try {
+    $output = theme('table', array('header' => $header, 'rows' => $row));
+  }
+  catch (Exception $e) {
+    watchdog('Short Answer', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
@@ -31,5 +38,5 @@ function theme_short_answer_user_answer($variables) {
  */
 function theme_short_answer_response_form($variables) {
   $form = $variables['form'];
-  return drupal_render_children($form);
+  return backdrop_render_children($form);
 }

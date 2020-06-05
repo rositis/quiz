@@ -1,5 +1,6 @@
 {
-  "node_options_quiz_page": [
+    "_config_name": "quiz_page.settings",
+    "node_options_quiz_page": [
     "status"
   ]
 }

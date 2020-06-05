@@ -11,19 +11,6 @@
  */
 
 /**
- * Implements hook_help().
- */
-function long_answer_help($path, $arg) {
-  if ($path == 'admin/help#long_answer') {
-    return '<p>' . t('This module provides long-answer (essay, multi-paragraph) questions to the quiz module.') .
-      '</p><p>' . t('A long-answer question is designed to provide the quiz taker a lengthy area to expand on ideas.
-      Common forms of long-answer questions include essays, single paragraph responses, hypothesis design problems,
-      outlines and summaries, and lengthier math problems
-      where the focus is on showing work rather than simply getting the correct answer.') . '</p>';
-  }
-}
-
-/**
  * Implements hook_quiz_question_info().
  */
 function long_answer_quiz_question_info() {
@@ -43,11 +30,12 @@ function long_answer_quiz_question_info() {
  * Implements hook_quiz_question_config().
  */
 function long_answer_quiz_question_config() {
+  $config = config('long_answer.settings');
   $form['long_answer_default_max_score'] = array(
     '#type' => 'textfield',
     '#title' => t('Default max score'),
     '#description' => t('Choose the default maximum score for a long answer question.'),
-    '#default_value' => variable_get('long_answer_default_max_score', 10),
+    '#default_value' => $config->get('long_answer_default_max_score'),
   );
   $form['#validate'][] = 'long_answer_config_validate';
   return $form;
@@ -69,12 +57,12 @@ function long_answer_theme() {
   return array(
     'long_answer_response_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'long_answer') . '/theme',
+      'path' => backdrop_get_path('module', 'long_answer') . '/theme',
       'file' => 'long_answer.theme.inc',
     ),
     'long_answer_answering_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'long_answer') . '/theme',
+      'path' => backdrop_get_path('module', 'long_answer') . '/theme',
       'template' => 'long-answer-answering-form',
     ),
   );
@@ -117,7 +105,7 @@ function long_answer_score_an_answer($values, $update_total = TRUE) {
 
   // Now the user data has been updated. We also need to update the data in the
   // quiz tables.
-  $quiz_result_answer = entity_load_single('quiz_result_answer', $quiz_question_response->result_answer_id);
+  $quiz_result_answer = entity_load('quiz_result_answer', $quiz_question_response->result_answer_id);
   $quiz_result_answer->points_awarded = $score;
   $quiz_result_answer->is_correct = $quiz_question_response->isCorrect();
   $quiz_result_answer->save();
