@@ -1,3 +1,5 @@
+Quiz
+======================
 The Quiz module lets you create graded assessments in Drupal. A Quiz is given as
 a series of questions. Answers are then stored in the database. Scores and
 results are displayed during or after the quiz. Administrators can provide
@@ -9,7 +11,20 @@ used as
 *   a self-learning program, using adaptive mode with multiple answer tries
 *   a training program, with multiple improving attempts
 
-## Features
+The quiz module allows users to administer a quiz, as a sequence of questions, and
+track the answers given. It allows for the creation of questions (and their answers),
+and organizes these questions into a quiz. Its target audience includes educational
+institutions, online training programs, employers, and people who just want to add a
+fun activity for their visitors to their Drupal site.
+
+The quiz module has a plethora of permission options. Unless you take care setting
+your permissions, the quiz module might not do everything you want it to do.
+
+For more information about quiz, and resources on how to use quiz, see the
+[Quiz project website](https://github.com/backdrop-contrib/quiz/)
+
+Features
+------------
 
 *   Extensive Views, Rules integration through Entity API
 *   Integration with H5P making 20+
@@ -33,7 +48,8 @@ used as
 *   AJAX quiz taking
 *   And many more...
 
-## Question types included
+Question types included
+------------
 
 *   H5P - 20 [H5P content types](http://h5p.org/content-types-and-applications)
     available
@@ -49,17 +65,17 @@ used as
 *   Drag and drop (with lines) - moved to
     https://www.drupal.org/project/quiz_ddlines
 
-## Quiz addons
-
+Quiz addons
+------------
 *   [Charts](http://drupal.org/project/charts) - used by Quiz stats to render
-    some useful data
+    some useful data - NOT YET PORTED TO BACKDROP
 *   [jQuery Countdown](http://drupal.org/project/jquery_countdown) - provides
-    jQuery timer for timed quizzes
+    jQuery timer for timed quizzes - NOT YET PORTED TO BACKDROP
 *   [Views Data Export](http://drupal.org/project/views_data_export) - export
-    Quiz results and user answers
+    Quiz results and user answers - NOT YET PORTED TO BACKDROP
 
-## Other modules we like
-
+Other modules we like
+------------
 *   [H5P - HTML5 learning objects](https://www.drupal.org/project/h5p)
 *   [Course](https://www.drupal.org/project/course) - put multiple quizzes
     together
@@ -70,48 +86,35 @@ Check out the
 [Quiz affiliated modules wiki](http://groups.drupal.org/node/177684)
 to see a fuller list of modules that extend quiz.
 
-## Upgrading from 7.x-4.x
-
-If you do not have any custom question modules, an upgrade to 5.x is easy.
-
-**Note:** There are core issues with MySQL 5.7, but only during the upgrade. See
-[here](https://www.drupal.org/node/2812685#comment-11702775) if you have to use
-MySQL 5.7 and Drupal 7. If you do have custom question modules, they may have to
-be updated slightly to work with the 5.x version.
-
-## Roadmap
-
-*   [#2378365]
-    *   Create multiple types of quizzes!
-    *   Custom quiz defaults per type
-    *   Optionally remove node dependency
-*   [#2378359]
-    *   Create multiple types of questions!
-    *   Varying content fields per question
-    *   Create audio questions, video questions, etc.
-
-## Support
-
+Support
+------------
 We have a big community supporting Quiz, and it's getting bigger! Let's make
 this the best assessment engine, ever. [IRC](https://drupal.org/irc),
 in #drupal-course (for Quiz, Course, Certificate module support)
-[IRC](https://drupal.org/irc), in #drupal-edu (general edu talk), 
+[IRC](https://drupal.org/irc), in #drupal-edu (general edu talk),
 [Drupal groups](https://groups.drupal.org/quiz),
-[The issue queue](https://www.drupal.org/project/issues/quiz)
 
-## Help out
+Documentation
+-------------
+Additional documentation is located in the Wiki:
+https://github.com/backdrop-contrib/invite/wiki/Documentation.
 
-Please continue to help out with cleaning up the issue queue!
-https://drupal.org/node/2280951 Have a feature request? Please open an issue in
-the issue queue!
+Issues
+------
+Bugs and Feature requests should be reported in the Issue Queue:
+https://github.com/backdrop-contrib/quiz/issues.
 
-## Drupal 8
+Current Maintainers
+-----------
+* [Ryan Osītis](https://github.com/rositis)
 
-The D7 version of this module is being cleaned up so that a migration/port to
-D8 will be easier.
+Credits
+------------
+Backdrop CMS Port:
 
-## Credits
+* [Ryan Osītis](https://github.com/rositis)
 
+Original Drupal Version:
 Many users have contributed lots of feature requests and bug reports. Previous
 maintainers also deserve a lot of credit! Join the Quiz group at
 http://groups.drupal.org/quiz to get involved! **Quiz is currently being
