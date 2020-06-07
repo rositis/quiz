@@ -9,20 +9,27 @@
  */
 
 /**
- * Implements hook_help().
+ * Implements hook_autoload_info().
+ *
+ * @return string[]
  */
-function matching_help($path, $args) {
-  switch ($path) {
-    case 'admin/modules#description':
-      return t('Matching question type for quiz module.');
+function matching_autoload_info() {
+  return array(
+    'MatchingQuestion' => 'includes/MatchingQuestion.class.inc',
+    'MatchingResponse' => 'includes/MatchingResponse.class.inc',
+    'MatchingTestCase' => 'tests/matching.test',
+  );
+}
 
-    case 'node/add#matching':
-    case 'admin/help#matching':
-      return t('A question type for the quiz module: allows you to create matching type questions, which connect terms with one another.');
-
-    default:
-      break;
-  }
+/**
+ * Implements hook_config_info().
+ */
+function matching_config_info() {
+  $prefixes['matching.settings'] = array(
+    'label' => t('Matching Question settings'),
+    'group' => t('Matching'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -45,16 +52,17 @@ function matching_quiz_question_info() {
  * Implements hook_quiz_question_config().
  */
 function matching_quiz_question_config() {
+  $config = config('matching.settings');
   $form['quiz_matching_form_size'] = array(
     '#type' => 'textfield',
     '#title' => t('Match Question Size'),
     '#description' => t('Number of questions allowed to wrap under a matching type question.'),
-    '#default_value' => variable_get('quiz_matching_form_size', 5),
+    '#default_value' => $config->get('quiz_matching_form_size'),
   );
   $form['quiz_matching_shuffle_options'] = array(
     '#type' => 'checkbox',
     '#title' => t('Shuffle Matching Questions'),
-    '#default_value' => variable_get('quiz_matching_shuffle_options', TRUE),
+    '#default_value' => $config->get('quiz_matching_shuffle_options'),
     '#description' => t('If checked matching questions will be shuffled'),
   );
   $form['#validate'][] = 'matching_config_validate';
@@ -77,27 +85,27 @@ function matching_theme() {
   return array(
     'matching_question_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'matching') . '/theme',
+      'path' => backdrop_get_path('module', 'matching') . '/theme',
       'file' => 'matching.theme.inc',
     ),
     'matching_response' => array(
       'variables' => array('metadata' => NULL, 'data' => NULL),
-      'path' => drupal_get_path('module', 'matching') . '/theme',
+      'path' => backdrop_get_path('module', 'matching') . '/theme',
       'file' => 'matching.theme.inc',
     ),
     'matching_subquestion_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'matching') . '/theme',
+      'path' => backdrop_get_path('module', 'matching') . '/theme',
       'file' => 'matching.theme.inc',
     ),
     'matching_match_node_view' => array(
       'variables' => array('subquestions' => NULL),
-      'path' => drupal_get_path('module', 'matching') . '/theme',
+      'path' => backdrop_get_path('module', 'matching') . '/theme',
       'file' => 'matching.theme.inc',
     ),
     'matching_answering_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'matching') . '/theme',
+      'path' => backdrop_get_path('module', 'matching') . '/theme',
       'template' => 'matching-answering-form',
     ),
 

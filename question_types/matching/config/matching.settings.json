@@ -1,0 +1,9 @@
+{
+    "_config_name": "mstching.settings",
+    "quiz_matching_form_size": 5,
+    "quiz_matching_shuffle_options": 1,
+    "choice_penalty": 0,
+    "node_options_matching": [
+        "status"
+    ]
+}

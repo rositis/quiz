@@ -23,13 +23,21 @@ function theme_matching_question_form($variables) {
   );
   foreach (element_children($form) as $key) {
     $rows[] = array(
-      'question' => drupal_render($form[$key]['question']),
-      'answer' => drupal_render($form[$key]['answer']),
-      'feedback' => drupal_render($form[$key]['feedback']),
+      'question' => backdrop_render($form[$key]['question']),
+      'answer' => backdrop_render($form[$key]['answer']),
+      'feedback' => backdrop_render($form[$key]['feedback']),
     );
   }
   // Theme output and display to screen.
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  $output = '';
+  try {
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  catch (Exception $e) {
+    watchdog('Matching Question', $e->getMessage());
+  }
+
+  return $output;
 }
 
 /**
@@ -46,7 +54,7 @@ function theme_matching_subquestion_form($variables) {
   foreach ($form as $key => $value) {
     if (is_int($key)) {
       $out .= '<tr><td class = "matching-question">' . $value['#question'];
-      $out .= '</td><td class = "matching-select">' . drupal_render_children($value) . '</td></tr>';
+      $out .= '</td><td class = "matching-select">' . backdrop_render_children($value) . '</td></tr>';
     }
   }
   $out .= '</table>';
@@ -61,6 +69,11 @@ function theme_matching_subquestion_form($variables) {
  * @return string
  *   An HTML string.
  */
+/**
+ * @param $variables
+ *
+ * @return string
+ */
 function theme_matching_match_node_view($variables) {
   $subquestions = $variables['subquestions'];
   // We know the correct answer for each subquestion.
@@ -71,7 +84,14 @@ function theme_matching_match_node_view($variables) {
   else {
     $header = array(t('Subquestion'), t('Possible match'));
   }
-  return theme('table', array('header' => $header, 'rows' => $subquestions));
+  $output = '';
+  try {
+    $output = theme('table', array('header' => $header, 'rows' => $subquestions));
+  }
+  catch (Exception $e) {
+    watchdog('Matching Question', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
@@ -81,6 +101,8 @@ function theme_matching_match_node_view($variables) {
  *
  * @return string
  *   An HTML string.
+ *
+ * @throws \Exception
  */
 function theme_matching_response($variables) {
   $metadata = $variables['metadata'];
