@@ -7,4 +7,4 @@
  * Variables available:
  * - $form.
  */
-print drupal_render($form);
+print backdrop_render($form);

@@ -15,8 +15,8 @@
  */
 function theme_multichoice_creation_form($variables) {
   $form = $variables['form'];
-  $path = drupal_get_path('module', 'multichoice') . '/multichoice.js';
-  drupal_add_js($path);
+  $path = backdrop_get_path('module', 'multichoice') . '/js/multichoice.js';
+  backdrop_add_js($path);
 
   // We open the settings fieldset if there is errors involving the choice_multi
   // setting.
@@ -28,12 +28,12 @@ function theme_multichoice_creation_form($variables) {
   // We open the alternative fieldsets if errors have been reported.
   if ($errors) {
     for ($i = 0; isset($form[$i]) && is_array($form[$i]); $i++) {
-      if (drupal_strlen(strip_tags($_POST['alternatives'][$i]['answer']['value'])) > 0) {
+      if (backdrop_strlen(strip_tags($_POST['alternatives'][$i]['answer']['value'])) > 0) {
         $form[$i]['#collapsed'] = FALSE;
       }
     }
   }
-  return drupal_render_children($form);
+  return backdrop_render_children($form);
 }
 
 /**
@@ -81,5 +81,12 @@ function theme_multichoice_answer_node_view($variables) {
       $answer_markup,
     );
   }
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  $output = '';
+  try {
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  catch (Exception $e) {
+    watchdog('Multichoice', $e->getMessage());
+  }
+  return $output;
 }

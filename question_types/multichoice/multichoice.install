@@ -11,8 +11,6 @@
 function multichoice_install() {
   // Add body field to multichoice node.
   quiz_question_add_body_field('multichoice');
-
-  variable_set('node_options_multichoice', array('status'));
 }
 
 /**
@@ -208,72 +206,29 @@ function multichoice_schema() {
 /**
  * Implements hook_uninstall().
  */
-function multichoice_uninstall() {
-  $var = array(
-    'multichoice_def_scoring',
-    'multichoice_def_num_of_alts',
-  );
-  foreach ($var as $v) {
-    variable_del($v);
-  }
+function multichoice_uninstall() {}
+
+/**
+ * Move Multichoice settings from variables to config.
+ */
+function multichoice_update_1000() {
+  // Migrate variables to config.
+  $config = config('multichoice.settings');
+  $config->set('ultichoice_def_num_of_alts', update_variable_get('ultichoice_def_num_of_alts', 2));
+  $config->set('multichoice_def_scoring', update_variable_get('multichoice_def_scoring', 0));
+  $config->set('bnode_options_multichoice', update_variable_get('node_options_multichoice', array('status')));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('ultichoice_def_num_of_alts');
+  update_variable_del('multichoice_def_scoring');
+  update_variable_del('node_options_multichoice');
 }
 
 /**
- * Change answer_format to a varchar.
+ * Implements hook_update_last_removed().
  */
-function multichoice_update_7500() {
-  $fields = array(
-    'answer_format',
-    'feedback_if_chosen_format',
-    'feedback_if_not_chosen_format',
-  );
-  foreach ($fields as $field) {
-    db_change_field('quiz_multichoice_answers', $field, $field, array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => TRUE,
-    ));
-  }
+function modulename_update_last_removed() {
+  return 7502;
 }
 
-/**
- * Add weights for multichoice alternatives.
- */
-function multichoice_update_7501() {
-  db_add_field('quiz_multichoice_answers', 'weight', array(
-    'type' => 'int',
-    'unsigned' => FALSE,
-    'not null' => TRUE,
-    'default' => 0,
-  ));
-  // Lol.
-  db_query('UPDATE {quiz_multichoice_answers} SET weight = id');
-  return t('Added weights for multichoice alternatives.');
-}
-
-/**
- * Normalize data storage.
- */
-function multichoice_update_7502() {
-  // Cleanup duplicates from 4.x.
-  $sql = "delete from {quiz_multichoice_user_answers}
-    where id in (select id from (select id from {quiz_multichoice_user_answers} ua group by result_id, question_nid, question_vid having count(*) > 1) as q)";
-  while (db_query($sql)->rowCount());
-
-  db_add_field('quiz_multichoice_user_answers', 'result_answer_id', array(
-    'type' => 'int',
-    'unsigned' => TRUE,
-    'not null' => FALSE,
-  ));
-
-  db_query("UPDATE {quiz_multichoice_user_answers} qtua
-    INNER JOIN {quiz_node_results_answers} qnra ON (qtua.question_nid = qnra.question_nid
-    AND qtua.question_vid = qnra.question_vid
-    AND qtua.result_id = qnra.result_id)
-    SET qtua.result_answer_id = qnra.result_answer_id");
-  db_drop_field('quiz_multichoice_user_answers', 'result_id');
-  db_drop_field('quiz_multichoice_user_answers', 'question_nid');
-  db_drop_field('quiz_multichoice_user_answers', 'question_vid');
-
-  db_add_unique_key('quiz_multichoice_user_answers', 'result_answer_id', array('result_answer_id'));
-}

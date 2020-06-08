@@ -8,7 +8,7 @@ var Multichoice = Multichoice || {};
       $(prefix + 'score-if-not-chosen').val('0');
     }
     else {
-      if (scoring == 0) {
+      if (scoring === 0) {
         $(prefix + 'score-if-not-chosen').val('0');
         if ($('#edit-choice-multi').attr('checked')) {
           $(prefix + 'score-if-chosen').val('-1');
@@ -17,7 +17,7 @@ var Multichoice = Multichoice || {};
           $(prefix + 'score-if-chosen').val('0');
         }
       }
-      else if (scoring == 1) {
+      else if (scoring === 1) {
         $(prefix + 'score-if-chosen').val('0');
         if ($('#edit-choice-multi').attr('checked')) {
           $(prefix + 'score-if-not-chosen').val('1');

@@ -9,27 +9,27 @@
  */
 
 /**
- * Implements hook_help().
+ * Implements hook_autoload_info().
+ *
+ * @return string[]
  */
-function multichoice_help($path, $args) {
-  if ($path == 'admin/help#multichoice') {
-    return t("
-      <p>This module provides a multiple choice question type for Quiz.</p>
+function multichoice_autoload_info() {
+  return array(
+    'MultichoiceQuestion' => 'includes/MultichoiceQuestion.class.inc',
+    'MultichoiceResponse' => 'includes/MultichoiceResponse.class.inc',
+    'MultichoiceTestCase' => 'tests/multichoice.test',
+  );
+}
 
-      <p>The module has three settings.
-      <em>Multiple answers</em> allows the quiz taker to select more than one alternative
-      (it also allows for the possibility that none of the alternatives are correct).
-      Alternatives are selected using checkboxes instead of radio buttons.
-      <em>Random order</em> displays the alternatives in random order when quiz is beeing taken.
-      <em>Simple scoring</em> gives max score if everything is correct. Zero points otherwise.</p>
-
-      <p>The scoring system in multichoice is a bit complex. With multiple answers each alternative adds a given number of points to
-      the total score if it is chosen, and another number of points is added if the alternative isn't chosen. Both <em>score if chosen</em> and
-      <em>score if not chosen</em> may be edited for each alternative by the question creator.
-      If multiple answers isn't allowed the score will be set to the <em>score if chosen</em> of the alternative that has been chosen.
-      The question is considered correct if the quiz taker gets the maximum amount of points possible for the question.</p>
-    ");
-  }
+/**
+ * Implements hook_config_info().
+ */
+function multichoice_config_info() {
+  $prefixes['multichoice.settings'] = array(
+    'label' => t('Multichoice settings'),
+    'group' => t('Multichoice'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -52,10 +52,11 @@ function multichoice_quiz_question_info() {
  * Implements hook_quiz_question_config().
  */
 function multichoice_quiz_question_config() {
+  $config = config('multichoice.settings');
   $form['multichoice_def_num_of_alts'] = array(
     '#type' => 'textfield',
     '#title' => t('Default number of alternatives'),
-    '#default_value' => variable_get('multichoice_def_num_of_alts', 2),
+    '#default_value' => $config->get('multichoice_def_num_of_alts'),
   );
   $form['multichoice_def_scoring'] = array(
     '#type' => 'radios',
@@ -65,7 +66,7 @@ function multichoice_quiz_question_config() {
       0 => t('Give minus one point for incorrect answers'),
       1 => t("Give one point for each incorrect option that haven't been chosen"),
     ),
-    '#default_value' => variable_get('multichoice_def_scoring', 0),
+    '#default_value' => $config->get('multichoice_def_scoring'),
   );
   $form['#validate'][] = 'multichoice_config_validate';
   return $form;
@@ -84,7 +85,7 @@ function multichoice_config_validate($form, $form_state) {
  * Implements hook_theme().
  */
 function multichoice_theme($existing, $type, $theme, $path) {
-  $path = drupal_get_path('module', 'multichoice') . '/theme';
+  $path = backdrop_get_path('module', 'multichoice') . '/theme';
   return array(
     'multichoice_creation_form' => array(
       'render element' => 'form',
@@ -119,6 +120,11 @@ function multichoice_theme($existing, $type, $theme, $path) {
 
 /**
  * Ajax callback function used when adding alternatives to the node-form.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return mixed
  */
 function multichoice_add_alternative_ajax_callback($form, &$form_state) {
   return $form['alternatives'];
@@ -155,13 +161,18 @@ function multichoice_field_extra_fields() {
 function multichoice_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'multichoice'),
+    'path' => backdrop_get_path('module', 'multichoice'),
   );
 }
 
 /**
  * AJAX callback function used when removing alternatives from the question edit
  * form.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return mixed
  */
 function multichoice_remove_alternative_ajax_callback($form, &$form_state) {
   return $form['alternatives'];
@@ -170,12 +181,15 @@ function multichoice_remove_alternative_ajax_callback($form, &$form_state) {
 /**
  * AJAX submit handler used when removing alternatives from the question edit
  * form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function multichoice_remove_alternative_submit($form, &$form_state) {
   $def_num_of_alts = variable_get('multichoice_def_num_of_alts', 2);
   $choice_count = $form_state['choice_count'];
   if ($choice_count <= $def_num_of_alts) {
-    drupal_set_message(t('Multiple choice must have at least !num alternatives.', array('!num' => $def_num_of_alts)), 'error');
+    backdrop_set_message(t('Multiple choice must have at least !num alternatives.', array('!num' => $def_num_of_alts)), 'error');
   }
   else {
     $button = $form_state['triggering_element'];

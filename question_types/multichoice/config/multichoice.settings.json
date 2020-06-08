@@ -1,0 +1,8 @@
+{
+    "_config_name": "multichoice.settings",
+    "ultichoice_def_num_of_alts": 2,
+    "multichoice_def_scoring": 0,
+    "node_options_multichoice": [
+        "status"
+    ]
+}

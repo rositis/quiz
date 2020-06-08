@@ -13,13 +13,13 @@ foreach (element_children($form) as $key) {
       'data' => array(
         array(
           'width' => 35,
-          'data' => drupal_render($form[$key]['correct']),
+          'data' => backdrop_render($form[$key]['correct']),
         ),
-        drupal_render($form[$key]['answer'])
-        . drupal_render($form[$key]['advanced'])
-        . drupal_render($form[$key]['remove_button'])
+        backdrop_render($form[$key]['answer'])
+        . backdrop_render($form[$key]['advanced'])
+        . backdrop_render($form[$key]['remove_button'])
         . theme('status_messages'),
-        drupal_render($form[$key]['weight']),
+        backdrop_render($form[$key]['weight']),
       ),
       'class' => array('draggable'),
     );
@@ -38,4 +38,4 @@ print theme('table', array(
     'id' => 'multichoice-alternatives-table',
   ),
 ));
-print drupal_render_children($form);
+print backdrop_render_children($form);

@@ -20,13 +20,13 @@ foreach ($options as $key => $value) {
   unset($form['user_answer'][$key]);
 }
 unset($form['user_answer']['#options']);
-print drupal_render_children($form);
+print backdrop_render_children($form);
 
 // We use the stored checkboxes and titles to generate a table for the
 // alternatives.
 foreach ($titles as $key => $value) {
   $row = array();
-  $row[] = array('data' => drupal_render($fullOptions[$key]), 'width' => 35);
+  $row[] = array('data' => backdrop_render($fullOptions[$key]), 'width' => 35);
   $row[] = $value;
   $rows[] = array('data' => $row, 'class' => array('multichoice-row'));
 }
