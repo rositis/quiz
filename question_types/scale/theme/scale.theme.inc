@@ -33,7 +33,7 @@ function theme_scale_answer_node_view($variables) {
  */
 function theme_scale_response_form($variables) {
   $form = $variables['form'];
-  return drupal_render_children($form);
+  return backdrop_render_children($form);
 }
 
 /**
@@ -47,5 +47,5 @@ function theme_scale_response_form($variables) {
  *   The scale creation form.
  */
 function theme_scale_creation_form($form) {
-  drupal_add_js(drupal_get_path('module', 'scale') . '/scale.js');
+  backdrop_add_js(backdrop_get_path('module', 'scale') . '/js/scale.js');
 }

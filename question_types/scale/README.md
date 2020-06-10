@@ -1,10 +1,5 @@
-
-/**
- * @file
- * README file for Quiz Scale.
- */
-
 Quiz Scale
+=============
 Allows quiz creators to make a special question type for surveys.
 
 Sponsored by: Norwegian Centre for Telemedicine

@@ -1,0 +1,8 @@
+{
+    "_config_name": "scale.settings",
+    "scale_max_num_of_alts": 10,
+    "multichoice_def_scoring": 0,
+    "node_options_scale": [
+        "status"
+    ]
+}

@@ -18,6 +18,30 @@ function scale_help($path, $args) {
 }
 
 /**
+ * Implements hook_autoload+info().
+ *
+ * @return string[]
+ */
+function scale_autoload_info() {
+  return array(
+    'ScaleQuestion' => 'includes/ScaleQuestion.class.inc',
+    'ScaleResponse' => 'includes/ScaleResponse.class.inc',
+    'ScaleTestCase' => 'tests/scale.test',
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function scale_config_info() {
+  $prefixes['scale.settings'] = array(
+    'label' => t('Quiz Scale settings'),
+    'group' => t('Quiz Scale'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_menu().
  */
 function scale_menu() {
@@ -26,7 +50,7 @@ function scale_menu() {
     'access callback' => 'node_access',
     'access arguments' => array('create', 'scale'),
     'type' => MENU_SUGGESTED_ITEM,
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('scale_manage_collection_form'),
   );
   return $items;
@@ -36,7 +60,7 @@ function scale_menu() {
  * Implements hook_theme().
  */
 function scale_theme($existing, $type, $theme, $path) {
-  $module_path = drupal_get_path('module', 'scale');
+  $module_path = backdrop_get_path('module', 'scale');
   return array(
     'scale_creation_form' => array(
       'render element' => 'form',
@@ -94,11 +118,12 @@ function scale_quiz_question_info() {
  * Implements hook_quiz_question_config().
  */
 function scale_quiz_question_config() {
+  $config = config('scale.settings');
   $form['manage'] = array('#markup' => l(t('Manage presets'), 'scale/collection/manage'));
   $form['scale_max_num_of_alts'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum number of alternatives allowed'),
-    '#default_value' => variable_get('scale_max_num_of_alts', 10),
+    '#default_value' => $config->get('scale_max_num_of_alts'),
   );
   $form['#validate'][] = 'scale_config_validate';
   return $form;
@@ -167,9 +192,14 @@ function scale_user_cancel($edit, $account, $method) {
  *
  * Users with the Edit global presets permissions can also add new global
  * presets here.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
  */
 function scale_manage_collection_form($form, &$form_state) {
-  global $user;
+  $config = config('scale.settings');
 
   $edit_globals_access = user_access('Edit global presets');
   // We create an instance of ScaleQuestion. We want to use some of its methods.
@@ -202,7 +232,7 @@ function scale_manage_collection_form($form, &$form_state) {
       '#group' => 'scale_manage_collection_form',
     );
     $alternatives = isset($collections[$col_id]->alternatives) ? $collections[$col_id]->alternatives : array();
-    for ($i = 0; $i < variable_get('scale_max_num_of_alts', 10); $i++) {
+    for ($i = 0; $i < $config->get('scale_max_num_of_alts'); $i++) {
       $form["collection$col_id"]["alternative$i"] = array(
         '#title' => t('Alternative !i', array('!i' => ($i + 1))),
         '#size' => 60,
@@ -256,6 +286,9 @@ function scale_manage_collection_form($form, &$form_state) {
 
 /**
  * Handles the scale collection form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function scale_collection_form_submit($form, &$form_state) {
   global $user;
@@ -322,31 +355,34 @@ function scale_collection_form_submit($form, &$form_state) {
 
         // New.
         case 3:
-          if (drupal_strlen($alternatives['alternative0']) > 0) {
+          if (backdrop_strlen($alternatives['alternative0']) > 0) {
             $new_col_id = $s_q->saveAnswerCollection(FALSE, $alternatives, 1);
             _scale_set_for_all($new_col_id, $alternatives['for_all']);
-            drupal_set_message(t('New preset has been added'));
+            backdrop_set_message(t('New preset has been added'));
           }
           break;
       }
     }
   }
   if ($changed > 0) {
-    drupal_set_message(t('!changed presets have been changed.', array('!changed' => $changed)));
+    backdrop_set_message(t('!changed presets have been changed.', array('!changed' => $changed)));
   }
   if ($deleted > 0) {
-    drupal_set_message(t('!deleted presets have been deleted.', array('!deleted' => $deleted)));
+    backdrop_set_message(t('!deleted presets have been deleted.', array('!deleted' => $deleted)));
   }
 }
 
 /**
  * Validates the scale collection form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function scale_collection_form_validate($form, &$form_state) {
   // If the user is trying to create a new collection.
-  if (drupal_strlen($form_state['values']['collectionnew']['alternative0']) > 0) {
+  if (backdrop_strlen($form_state['values']['collectionnew']['alternative0']) > 0) {
     // If the new collection don't have two alternatives.
-    if (drupal_strlen($form_state['values']['collectionnew']['alternative1']) == 0) {
+    if (backdrop_strlen($form_state['values']['collectionnew']['alternative1']) == 0) {
       // This can't be replaced by adding #required to the form elements. If
       // we did so we would always have to create a new collection when we
       // press submit.
@@ -365,7 +401,7 @@ function scale_collection_form_validate($form, &$form_state) {
  */
 function _scale_get_col_id($string) {
   $res = array();
-  $success = preg_match('/^collection([0-9]{1,}|new)$/', $string, $res);
+  $success = preg_match('/^collection([0-9]+|new)$/', $string, $res);
   return ($success > 0) ? $res[1] : FALSE;
 }
 

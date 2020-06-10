@@ -33,9 +33,188 @@ class ScaleQuestion extends QuizQuestion {
   }
 
   /**
+   * Implementation of validateNode().
+   *
+   * @see QuizQuestion::validateNode()
+   */
+  public function validateNode(array &$form) {}
+
+  /**
+   * Implementation of getCreationForm().
+   *
+   * @see QuizQuestion::getCreationForm()
+   *
+   * @param array|null $form_state
+   *
+   * @return array
+   */
+  public function getCreationForm(array &$form_state = NULL) {
+    $config = config('scale.settings');
+    $form = array();
+
+    // Getting presets from the database.
+    $collections = $this->getPresetCollections(TRUE);
+    $options = $this->makeOptions($collections);
+    $options['d'] = '-'; // Default.
+    $jsArray = $this->makeJSArray($collections);
+
+    $form['answer'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Answer'),
+      '#description' => t('Provide alternatives for the user to answer.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#weight' => -4,
+    );
+    $form['answer']['#theme'][] = 'scale_creation_form';
+    $form['answer']['presets'] = array(
+      '#type' => 'select',
+      '#title' => t('Presets'),
+      '#options' => $options,
+      '#default_value' => 'd',
+      '#description' => t('Select a set of alternatives'),
+      '#attributes' => array('onchange' => 'refreshAlternatives(this)'),
+    );
+    $max_num_alts = $config->get('scale_max_num_of_alts');
+    // TODO: use backdrop_add_js($path, 'settings').
+    $form['jsArray'] = array('#markup' => "<script type='text/javascript'>$jsArray var scale_max_num_of_alts = $max_num_alts;</script>");
+    $form['answer']['alternatives'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Alternatives'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    for ($i = 0; $i < $max_num_alts; $i++) {
+      $form['answer']['alternatives']["alternative$i"] = array(
+        '#type' => 'textfield',
+        '#title' => t('Alternative !i', array('!i' => ($i + 1))),
+        '#size' => 60,
+        '#maxlength' => 256,
+        '#default_value' => isset($this->node->scale[$i]->answer) ? $this->node->scale[$i]->answer : '',
+        '#required' => $i < 2,
+      );
+    }
+    // @todo: Rename save to save_as_preset or something.
+    $form['answer']['alternatives']['save'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Save as a new preset'),
+      '#description' => t('Current alternatives will be saved as a new preset'),
+      '#default_value' => FALSE,
+    );
+    $form['answer']['manage'] = array('#markup' => l(t('Manage presets'), 'scale/collection/manage'));
+    return $form;
+  }
+
+  /**
+   * Implementation of getAnsweringForm().
+   *
+   * @see QuizQuestion::getAnsweringForm()
+   *
+   * @param int $result_id
+   * @param array|null $form_state
+   *
+   * @return array
+   */
+  public function getAnsweringForm($result_id, array $form_state = NULL) {
+    $config = config('scale.settings');
+    $form = parent::getAnsweringForm($result_id, $form_state);
+    //$form['#theme'] = 'scale_answering_form';
+    $options = array();
+    for ($i = 0; $i < $config->get('scale_max_num_of_alts'); $i++) {
+      if (isset($this->node->scale[$i]) && backdrop_strlen($this->node->scale[$i]->answer) > 0) {
+        $options[$this->node->scale[$i]->id] = check_plain($this->node->scale[$i]->answer);
+      }
+    }
+
+    $form = array(
+      '#type' => 'radios',
+      '#title' => t('Choose one'),
+      '#options' => $options,
+    );
+    if (isset($result_id)) {
+      $response = new ScaleResponse($result_id, $this->node);
+      $form['#default_value'] = $response->getResponse();
+    }
+    return $form;
+  }
+
+  /**
+   * Question response validator.
+   *
+   * @param array $element
+   * @param mixed $value
+   */
+  public function getAnsweringFormValidate(array &$element, &$value) {
+    if ($value == '') {
+      form_error($element, t('You must provide an answer.'));
+    }
+  }
+
+  /**
+   * Implementation of getMaximumScore().
+   *
+   * @see QuizQuestion::getMaximumScore()
+   */
+  public function getMaximumScore() {
+    // In some use-cases we want to reward users for answering a survey
+    // question. This is why 1 is returned and not zero.
+    return 1;
+  }
+
+  /**
+   * Implementation of delete().
+   *
+   * @see QuizQuestion::delete()
+   *
+   * @param bool $only_this_version
+   */
+  public function delete($only_this_version = FALSE) {
+    parent::delete($only_this_version);
+    if ($only_this_version) {
+
+      db_delete('quiz_scale_node_properties')
+        ->condition('nid', $this->node->nid)
+        ->condition('vid', $this->node->vid)
+        ->execute();
+    }
+    else {
+
+      db_delete('quiz_scale_node_properties')
+        ->condition('nid', $this->node->nid)
+        ->execute();
+    }
+    $this->deleteCollectionIfNotUsed($this->node->scale[0]->answer_collection_id, 0);
+  }
+
+  /**
+   * Implementation of getNodeProperties().
+   *
+   * @see QuizQuestion::getNodeProperties()
+   */
+  public function getNodeProperties() {
+    if (isset($this->nodeProperties)) {
+      return $this->nodeProperties;
+    }
+    $props = parent::getNodeProperties();
+
+    $res = db_query('SELECT id, answer, a.answer_collection_id
+            FROM {quiz_scale_node_properties} p
+            JOIN {quiz_scale_answer} a ON (p.answer_collection_id = a.answer_collection_id)
+            WHERE nid = :nid AND vid = :vid
+            ORDER BY a.id', array(':nid' => $this->node->nid, ':vid' => $this->node->vid));
+    foreach ($res as $res_o) {
+      $props['scale'][] = $res_o;
+    }
+    $this->nodeProperties = $props;
+    return $props;
+  }
+
+  /**
    * Implementation of saveNodeProperties().
    *
    * @see QuizQuestion::saveNodeProperties()
+   *
+   * @param bool $is_new
    */
   public function saveNodeProperties($is_new = FALSE) {
     $is_new_node = $is_new || $this->node->revision == 1;
@@ -46,13 +225,19 @@ class ScaleQuestion extends QuizQuestion {
       $this->setPreset($answer_collection_id);
     }
     if ($is_new_node) {
-      $id = db_insert('quiz_scale_node_properties')
-        ->fields(array(
-          'nid' => $this->node->nid,
-          'vid' => $this->node->vid,
-          'answer_collection_id' => $answer_collection_id,
-        ))
-        ->execute();
+      try {
+        $id = db_insert('quiz_scale_node_properties')
+          ->fields(array(
+            'nid' => $this->node->nid,
+            'vid' => $this->node->vid,
+            'answer_collection_id' => $answer_collection_id,
+          ))
+          ->execute();
+      }
+      catch (Exception $e) {
+        watchdog_exception('Scale Question', $e);
+      }
+
     }
     else {
       db_update('quiz_scale_node_properties')
@@ -66,6 +251,34 @@ class ScaleQuestion extends QuizQuestion {
   }
 
   /**
+   * Implementation of getNodeView().
+   *
+   * @see QuizQuestion::getNodeView()
+   */
+  public function getNodeView() {
+    $config = config('scale.settings');
+    $content = parent::getNodeView();
+    $alternatives = array();
+    for ($i = 0; $i < $config->get('scale_max_num_of_alts'); $i++) {
+      if (isset($this->node->scale[$i]->answer) && backdrop_strlen($this->node->scale[$i]->answer) > 0) {
+        $alternatives[] = check_plain($this->node->scale[$i]->answer);
+      }
+    }
+    $output = '';
+    try {
+      $output = theme('scale_answer_node_view', array('alternatives' => $alternatives));
+    }
+    catch (Exception $e) {
+      watchdog_exception('Scale Question', $e);
+    }
+    $content['answers'] = array(
+      '#markup' => $output,
+      '#weight' => 2,
+    );
+    return $content;
+  }
+
+  /**
    * Add a preset for the current user.
    *
    * @param int $col_id
@@ -73,16 +286,21 @@ class ScaleQuestion extends QuizQuestion {
    *   preset.
    */
   private function setPreset($col_id) {
-    db_merge('quiz_scale_user')
-      ->key(array(
-        'uid' => $GLOBALS['user']->uid,
-        'answer_collection_id' => $col_id,
-      ))
-      ->fields(array(
-        'uid' => $GLOBALS['user']->uid,
-        'answer_collection_id' => $col_id,
-      ))
-      ->execute();
+    try {
+      db_merge('quiz_scale_user')
+        ->key(array(
+          'uid' => $GLOBALS['user']->uid,
+          'answer_collection_id' => $col_id,
+        ))
+        ->fields(array(
+          'uid' => $GLOBALS['user']->uid,
+          'answer_collection_id' => $col_id,
+        ))
+        ->execute();
+    }
+    catch (Exception $e) {
+      watchdog_exception('Scale Question', $e);
+    }
   }
 
   /**
@@ -105,6 +323,7 @@ class ScaleQuestion extends QuizQuestion {
    */
   public function saveAnswerCollection($is_new_node, array $alt_input = NULL, $preset = NULL) {
     global $user;
+    $config = config('scale.settings');
     if (!isset($alt_input)) {
       $alt_input = get_object_vars($this->node);
     }
@@ -113,12 +332,12 @@ class ScaleQuestion extends QuizQuestion {
     }
 
     $alternatives = array();
-    for ($i = 0; $i < variable_get('scale_max_num_of_alts', 10); $i++) {
-      if (isset($alt_input['alternative' . $i]) && drupal_strlen($alt_input['alternative' . $i]) > 0) {
+    for ($i = 0; $i < $config->get('scale_max_num_of_alts'); $i++) {
+      if (isset($alt_input['alternative' . $i]) && backdrop_strlen($alt_input['alternative' . $i]) > 0) {
         // Handle the form.
         $alternatives[] = $alt_input['alternative' . $i];
       }
-      elseif (isset($alt_input['scale'][$i]->answer) && drupal_strlen($alt_input['scale'][$i]->answer) > 0) {
+      elseif (isset($alt_input['scale'][$i]->answer) && backdrop_strlen($alt_input['scale'][$i]->answer) > 0) {
         // Handle programmatic save.
         $alternatives[] = $alt_input['scale'][$i]->answer;
       }
@@ -139,18 +358,29 @@ class ScaleQuestion extends QuizQuestion {
       return $answer_collection_id;
     }
     // Register a new answer collection.
-    $answer_collection_id = db_insert('quiz_scale_answer_collection')
-      ->fields(array('for_all' => 1))
-      ->execute();
+    try {
+      $answer_collection_id = db_insert('quiz_scale_answer_collection')
+        ->fields(array('for_all' => 1))
+        ->execute();
+    }
+    catch (Exception $e) {
+      watchdog_exception('Scale Question', $e);
+    }
 
     // Save as preset if checkbox for preset has been checked.
     if ($preset == 1) {
-      $id = db_insert('quiz_scale_user')
-        ->fields(array(
-          'uid' => $user->uid,
-          'answer_collection_id' => $answer_collection_id,
-        ))
-        ->execute();
+      try {
+        $id = db_insert('quiz_scale_user')
+          ->fields(array(
+            'uid' => $user->uid,
+            'answer_collection_id' => $answer_collection_id,
+          ))
+          ->execute();
+      }
+      catch (Exception $e) {
+        watchdog_exception('Scale Question', $e);
+      }
+
     }
     // Save the alternatives in the answer collection.
     //db_lock_table('quiz_scale_answer');
@@ -170,12 +400,17 @@ class ScaleQuestion extends QuizQuestion {
    *   The id of the answer collection this alternative shall belong to.
    */
   private function saveAlternative($alternative, $answer_collection_id) {
-    $id = db_insert('quiz_scale_answer')
-      ->fields(array(
-        'answer_collection_id' => $answer_collection_id,
-        'answer' => $alternative,
-      ))
-      ->execute();
+    try {
+      $id = db_insert('quiz_scale_answer')
+        ->fields(array(
+          'answer_collection_id' => $answer_collection_id,
+          'answer' => $alternative,
+        ))
+        ->execute();
+    }
+    catch (Exception $e) {
+      watchdog_exception('Scale Question', $e);
+    }
   }
 
   /**
@@ -279,178 +514,6 @@ class ScaleQuestion extends QuizQuestion {
   }
 
   /**
-   * Implementation of validateNode().
-   *
-   * @see QuizQuestion::validateNode()
-   */
-  public function validateNode(array &$form) {
-
-  }
-
-  /**
-   * Implementation of delete().
-   *
-   * @see QuizQuestion::delete()
-   */
-  public function delete($only_this_version = FALSE) {
-    parent::delete($only_this_version);
-    if ($only_this_version) {
-
-      db_delete('quiz_scale_node_properties')
-        ->condition('nid', $this->node->nid)
-        ->condition('vid', $this->node->vid)
-        ->execute();
-    }
-    else {
-
-      db_delete('quiz_scale_node_properties')
-        ->condition('nid', $this->node->nid)
-        ->execute();
-    }
-    $this->deleteCollectionIfNotUsed($this->node->scale[0]->answer_collection_id, 0);
-  }
-
-  /**
-   * Implementation of getNodeProperties().
-   *
-   * @see QuizQuestion::getNodeProperties()
-   */
-  public function getNodeProperties() {
-    if (isset($this->nodeProperties)) {
-      return $this->nodeProperties;
-    }
-    $props = parent::getNodeProperties();
-
-    $res = db_query('SELECT id, answer, a.answer_collection_id
-            FROM {quiz_scale_node_properties} p
-            JOIN {quiz_scale_answer} a ON (p.answer_collection_id = a.answer_collection_id)
-            WHERE nid = :nid AND vid = :vid
-            ORDER BY a.id', array(':nid' => $this->node->nid, ':vid' => $this->node->vid));
-    foreach ($res as $res_o) {
-      $props['scale'][] = $res_o;
-    }
-    $this->nodeProperties = $props;
-    return $props;
-  }
-
-  /**
-   * Implementation of getNodeView().
-   *
-   * @see QuizQuestion::getNodeView()
-   */
-  public function getNodeView() {
-    $content = parent::getNodeView();
-    $alternatives = array();
-    for ($i = 0; $i < variable_get('scale_max_num_of_alts', 10); $i++) {
-      if (isset($this->node->scale[$i]->answer) && drupal_strlen($this->node->scale[$i]->answer) > 0) {
-        $alternatives[] = check_plain($this->node->scale[$i]->answer);
-      }
-    }
-    $content['answers'] = array(
-      '#markup' => theme('scale_answer_node_view', array('alternatives' => $alternatives)),
-      '#weight' => 2,
-    );
-    return $content;
-  }
-
-  /**
-   * Implementation of getAnsweringForm().
-   *
-   * @see QuizQuestion::getAnsweringForm()
-   */
-  public function getAnsweringForm(array $form_state = NULL, $result_id) {
-    $form = parent::getAnsweringForm($form_state, $result_id);
-    //$form['#theme'] = 'scale_answering_form';
-    $options = array();
-    for ($i = 0; $i < variable_get('scale_max_num_of_alts', 10); $i++) {
-      if (isset($this->node->scale[$i]) && drupal_strlen($this->node->scale[$i]->answer) > 0) {
-        $options[$this->node->scale[$i]->id] = check_plain($this->node->scale[$i]->answer);
-      }
-    }
-
-    $form = array(
-      '#type' => 'radios',
-      '#title' => t('Choose one'),
-      '#options' => $options,
-    );
-    if (isset($result_id)) {
-      $response = new ScaleResponse($result_id, $this->node);
-      $form['#default_value'] = $response->getResponse();
-    }
-    return $form;
-  }
-
-  /**
-   * Question response validator.
-   */
-  public function getAnsweringFormValidate(array &$element, &$value) {
-    if ($value == '') {
-      form_error($element, t('You must provide an answer.'));
-    }
-  }
-
-  /**
-   * Implementation of getCreationForm().
-   *
-   * @see QuizQuestion::getCreationForm()
-   */
-  public function getCreationForm(array &$form_state = NULL) {
-    $form = array();
-
-    // Getting presets from the database.
-    $collections = $this->getPresetCollections(TRUE);
-    $options = $this->makeOptions($collections);
-    $options['d'] = '-'; // Default.
-    $jsArray = $this->makeJSArray($collections);
-
-    $form['answer'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Answer'),
-      '#description' => t('Provide alternatives for the user to answer.'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      '#weight' => -4,
-    );
-    $form['answer']['#theme'][] = 'scale_creation_form';
-    $form['answer']['presets'] = array(
-      '#type' => 'select',
-      '#title' => t('Presets'),
-      '#options' => $options,
-      '#default_value' => 'd',
-      '#description' => t('Select a set of alternatives'),
-      '#attributes' => array('onchange' => 'refreshAlternatives(this)'),
-    );
-    $max_num_alts = variable_get('scale_max_num_of_alts', 10);
-    // TODO: use drupal_add_js($path, 'settings').
-    $form['jsArray'] = array('#markup' => "<script type='text/javascript'>$jsArray var scale_max_num_of_alts = $max_num_alts;</script>");
-    $form['answer']['alternatives'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Alternatives'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    for ($i = 0; $i < $max_num_alts; $i++) {
-      $form['answer']['alternatives']["alternative$i"] = array(
-        '#type' => 'textfield',
-        '#title' => t('Alternative !i', array('!i' => ($i + 1))),
-        '#size' => 60,
-        '#maxlength' => 256,
-        '#default_value' => isset($this->node->scale[$i]->answer) ? $this->node->scale[$i]->answer : '',
-        '#required' => $i < 2,
-      );
-    }
-    // @todo: Rename save to save_as_preset or something.
-    $form['answer']['alternatives']['save'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Save as a new preset'),
-      '#description' => t('Current alternatives will be saved as a new preset'),
-      '#default_value' => FALSE,
-    );
-    $form['answer']['manage'] = array('#markup' => l(t('Manage presets'), 'scale/collection/manage'));
-    return $form;
-  }
-
-  /**
    * Get all available presets for the current user.
    *
    * @param bool $with_defaults
@@ -546,108 +609,4 @@ class ScaleQuestion extends QuizQuestion {
     }
     return $jsArray;
   }
-
-  /**
-   * Implementation of getMaximumScore().
-   *
-   * @see QuizQuestion::getMaximumScore()
-   */
-  public function getMaximumScore() {
-    // In some use-cases we want to reward users for answering a survey
-    // question. This is why 1 is returned and not zero.
-    return 1;
-  }
-
-}
-
-/**
- * Extension of QuizQuestionResponse.
- */
-class ScaleResponse extends QuizQuestionResponse {
-
-  /**
-   * ID of the answer.
-   */
-  protected $answer_id = 0;
-
-  /**
-   * Constructor.
-   *
-   * @param int $result_id
-   *   The result ID for the user's result set. There is one result ID per time
-   *   the user takes a quiz.
-   * @param stdClass $question_node
-   *   The question node.
-   * @param mixed $answer
-   *   The answer (dependent on question type).
-   */
-  public function __construct($result_id, stdClass $question_node, $answer = NULL) {
-    parent::__construct($result_id, $question_node, $answer);
-
-    if (isset($answer)) {
-      $this->answer_id = intval($answer);
-    }
-    else {
-      $this->answer_id = db_query('SELECT answer_id FROM {quiz_scale_user_answers} WHERE result_answer_id = :raid', array(':raid' => $this->result_answer_id))->fetchField();
-    }
-    $answer = db_query('SELECT answer FROM {quiz_scale_answer} WHERE id = :id', array(':id' => $this->answer_id))->fetchField();
-    $this->answer = check_plain($answer);
-  }
-
-  /**
-   * Implementation of save().
-   *
-   * @see QuizQuestionResponse::save()
-   */
-  public function save() {
-    db_merge('quiz_scale_user_answers')->key(array('result_answer_id' => $this->result_answer_id))
-      ->fields(array(
-        'answer_id' => $this->answer_id,
-        'result_answer_id' => $this->result_answer_id,
-      ))
-      ->execute();
-  }
-
-  /**
-   * Implementation of delete().
-   *
-   * @see QuizQuestionResponse::delete()
-   */
-  public function delete() {
-    db_delete('quiz_scale_user_answers')
-      ->condition('result_answer_id', $this->result_answer_id)
-      ->execute();
-  }
-
-  /**
-   * Implementation of score().
-   *
-   * @see QuizQuestionResponse::score()
-   */
-  public function score() {
-    return (bool) $this->getResponse();
-  }
-
-  /**
-   * Implementation of getResponse().
-   *
-   * @see QuizQuestionResponse::getResponse()
-   */
-  public function getResponse() {
-    return $this->answer_id;
-  }
-
-  /**
-   * Implementation of getFeedbackValues().
-   *
-   * @see QuizQuestionResponse::getFeedbackValues()
-   */
-  public function getFeedbackValues() {
-    $data = array();
-    $data[] = array(
-      'choice' => $this->answer,
-    );
-    return $data;
-  }
-
 }
