@@ -12,6 +12,9 @@
  */
 function quiz_admin_settings($form, &$form_state) {
   $form = array();
+  $config = config('quiz.settings');
+
+  $form['#config'] = 'modulename.settings';
 
   $form['quiz_global_settings'] = array(
     '#type' => 'fieldset',
@@ -24,28 +27,28 @@ function quiz_admin_settings($form, &$form_state) {
   $form['quiz_global_settings']['quiz_auto_revisioning'] = array(
     '#type' => 'checkbox',
     '#title' => t('Auto revisioning'),
-    '#default_value' => variable_get('quiz_auto_revisioning', 1),
+    '#default_value' => $config->get('quiz_auto_revisioning'),
     '#description' => t('It is strongly recommended that auto revisioning is always on. It makes sure that when a question or quiz is changed a new revision is created if the current revision has been answered. If this feature is switched off result reports might be broken because a users saved answer might be connected to a wrong version of the quiz and/or question she was answering. All sorts of errors might appear.'),
   );
 
   $form['quiz_global_settings']['quiz_durod'] = array(
     '#type' => 'checkbox',
     '#title' => t('Delete results when a user is deleted'),
-    '#default_value' => variable_get('quiz_durod', 0),
+    '#default_value' => $config->get('quiz_durod'),
     '#description' => t('When a user is deleted delete any and all results for that user.'),
   );
 
   $form['quiz_global_settings']['quiz_index_questions'] = array(
     '#type' => 'checkbox',
     '#title' => t('Index questions'),
-    '#default_value' => variable_get('quiz_index_questions', 1),
+    '#default_value' => $config->get('quiz_index_questions'),
     '#description' => t('If you turn this off, questions will not show up in search results. Note that you will need to enable the "View quiz question outside of a quiz" permission for anonymous users, as search needs this to index the question.'),
   );
 
   $form['quiz_global_settings']['quiz_default_close'] = array(
     '#type' => 'textfield',
     '#title' => t('Default number of days before a @quiz is closed', array('@quiz' => QUIZ_NAME)),
-    '#default_value' => variable_get('quiz_default_close', 30),
+    '#default_value' => $config->get('quiz_default_close'),
     '#size' => 4,
     '#maxlength' => 4,
     '#description' => t('Supply a number of days to calculate the default close date for new quizzes.'),
@@ -54,7 +57,7 @@ function quiz_admin_settings($form, &$form_state) {
   $form['quiz_global_settings']['quiz_use_passfail'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow quiz creators to set a pass/fail option when creating a @quiz.', array('@quiz' => strtolower(QUIZ_NAME))),
-    '#default_value' => variable_get('quiz_use_passfail', 1),
+    '#default_value' => $config->get('quiz_use_passfail'),
     '#description' => t('Check this to display the pass/fail options in the @quiz form. If you want to prohibit other quiz creators from changing the default pass/fail percentage, uncheck this option.', array('@quiz' => QUIZ_NAME)),
   );
 
@@ -62,7 +65,7 @@ function quiz_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Maximum result options'),
     '#description' => t('Set the maximum number of result options (categorizations for scoring a quiz). Set to 0 to disable result options.'),
-    '#default_value' => variable_get('quiz_max_result_options', 5),
+    '#default_value' => $config->get('quiz_max_result_options'),
     '#size' => 2,
     '#maxlength' => 2,
     '#required' => FALSE,
@@ -71,7 +74,7 @@ function quiz_admin_settings($form, &$form_state) {
   $form['quiz_global_settings']['quiz_remove_partial_quiz_record'] = array(
     '#title' => t('Remove incomplete quiz records (older than)'),
     '#description' => t('Number of days to keep incomplete quiz attempts.'),
-    '#default_value' => variable_get('quiz_remove_partial_quiz_record', 0),
+    '#default_value' => $config->get('quiz_remove_partial_quiz_record'),
     '#type' => module_exists('timeperiod') ? 'timeperiod_select' : 'textfield',
     '#units' => array(
       '86400' => array('max' => 30, 'step size' => 1),
@@ -83,7 +86,7 @@ function quiz_admin_settings($form, &$form_state) {
   $form['quiz_global_settings']['quiz_remove_invalid_quiz_record'] = array(
     '#title' => t('Remove invalid quiz records (older than)'),
     '#description' => t('Number of days to keep invalid quiz attempts.'),
-    '#default_value' => variable_get('quiz_remove_invalid_quiz_record', 86400),
+    '#default_value' => $config->get('quiz_remove_invalid_quiz_record'),
     '#type' => module_exists('timeperiod') ? 'timeperiod_select' : 'textfield',
     '#units' => array(
       '86400' => array('max' => 30, 'step size' => 1),
@@ -98,7 +101,7 @@ function quiz_admin_settings($form, &$form_state) {
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t("Integer between 0 and 128. If the question creator doesn't set a question title the system will make a title automatically. Here you can decide how long the autotitle can be."),
-    '#default_value' => variable_get('quiz_autotitle_length', 50),
+    '#default_value' => $config->get('quiz_autotitle_length'),
   );
 
   $form['quiz_global_settings']['quiz_pager_start'] = array(
@@ -107,7 +110,7 @@ function quiz_admin_settings($form, &$form_state) {
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t('If a quiz has this many questions, a pager will be displayed instead of a select box.'),
-    '#default_value' => variable_get('quiz_pager_start', 100),
+    '#default_value' => $config->get('quiz_pager_start'),
   );
 
   $form['quiz_global_settings']['quiz_pager_siblings'] = array(
@@ -116,7 +119,7 @@ function quiz_admin_settings($form, &$form_state) {
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t('Number of siblings to show.'),
-    '#default_value' => variable_get('quiz_pager_siblings', 5),
+    '#default_value' => $config->get('quiz_pager_siblings'),
   );
 
   $form['quiz_global_settings']['quiz_time_limit_buffer'] = array(
@@ -125,7 +128,7 @@ function quiz_admin_settings($form, &$form_state) {
     '#size' => 3,
     '#maxlength' => 3,
     '#description' => t('How many seconds after the time limit runs out to allow answers.'),
-    '#default_value' => variable_get('quiz_time_limit_buffer', 5),
+    '#default_value' => $config->get('quiz_time_limit_buffer'),
     '#element_validate' => array('element_validate_integer'),
   );
 
@@ -139,7 +142,8 @@ function quiz_admin_settings($form, &$form_state) {
       '#title' => $when['name'],
       '#type' => 'checkboxes',
       '#options' => $review_options,
-      '#default_value' => variable_get("quiz_admin_review_options_$key", array()),
+      // TODO: Sort this out in the hook_install.
+      '#default_value' => $config->get("quiz_admin_review_options_$key", array()),
     );
   }
 
@@ -150,7 +154,7 @@ function quiz_admin_settings($form, &$form_state) {
   );
 
   $links = array(
-    '!jquery_countdown' => l(t('JQuery Countdown'), 'http://drupal.org/project/jquery_countdown', $target),
+    '!jquery_countdown' => l(t('JQuery Countdown'), 'http://backdrop.org/project/jquery_countdown', $target),
   );
 
   $form['quiz_addons'] = array(
@@ -164,7 +168,7 @@ function quiz_admin_settings($form, &$form_state) {
   $form['quiz_addons']['quiz_has_timer'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display timer'),
-    '#default_value' => variable_get('quiz_has_timer', 0),
+    '#default_value' => $config->get('quiz_has_timer'),
     '#description' => t("!jquery_countdown is an <strong>optional</strong> module for Quiz. It is used to display a timer when taking a quiz. Without this timer, the user will not know how much time they have left to complete the Quiz", $links),
     '#disabled' => !function_exists('jquery_countdown_add'),
   );
@@ -222,7 +226,7 @@ function quiz_settings_form_validate($form, &$form_state) {
  */
 function quiz_settings_form_submit($form, &$form_state) {
   if (QUIZ_NAME != $form_state['values']['quiz_name']) {
-    variable_set('quiz_name', $form_state['values']['quiz_name']);
+    config_set('quiz.settings','quiz_name', $form_state['values']['quiz_name']);
     define(QUIZ_NAME, $form_state['values']['quiz_name']);
     menu_rebuild();
   }
@@ -232,6 +236,11 @@ function quiz_settings_form_submit($form, &$form_state) {
  * Renders the quiz node form for the admin pages.
  *
  * This form is used to configure default values for the quiz node form.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
  */
 function quiz_admin_node_form($form, &$form_state) {
   // Create a dummy node to use as input for quiz_form.
@@ -267,6 +276,9 @@ function quiz_admin_node_form($form, &$form_state) {
 
 /**
  * Validation function for the quiz_admin_node_form form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_admin_node_form_validate($form, &$form_state) {
   // Create dummy node for quiz_validate.
@@ -292,6 +304,9 @@ function quiz_admin_node_form_validate($form, &$form_state) {
  * database tables as any other user settings, making the code a lot easier to
  * maintain.
  * Ref: http://en.wikipedia.org/wiki/Don%27t_repeat_yourself
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_admin_node_form_submit($form, &$form_state) {
   // We add the uid for the "default user"
@@ -313,8 +328,10 @@ function quiz_admin_node_form_submit($form, &$form_state) {
  *
  * @param $quiz
  *   The quiz node.
- * @param $result_id
+ * @param $quiz_result
  *   The result id.
+ *
+ * @return array|NULL
  */
 function quiz_admin_results($quiz, $quiz_result) {
   // Preserve "Results" tab.
@@ -333,13 +350,13 @@ function quiz_admin_results($quiz, $quiz_result) {
  *
  * @param $node
  *   The quiz node we are managing questions for.
- * @return
+ * @return string
  *   String containing the form.
  */
 function quiz_questions_page($node) {
   if ($node->randomization < 3) {
-    $mq_form = drupal_get_form('quiz_questions_form', $node);
-    $manage_questions = drupal_render($mq_form);
+    $mq_form = backdrop_get_form('quiz_questions_form', $node);
+    $manage_questions = backdrop_render($mq_form);
     $question_bank = views_get_view('quiz_question_bank')->preview();
 
     // Insert into vert tabs.
@@ -359,23 +376,32 @@ function quiz_questions_page($node) {
     );
   }
   else {
-    $form = drupal_get_form('quiz_categorized_form', $node);
+    $form = backdrop_get_form('quiz_categorized_form', $node);
   }
   $variables = array(
     'node' => $node,
     'form' => $form,
   );
-  return theme('quiz_questions_page', $variables);
+  try {
+    $output = theme('quiz_questions_page', $variables);
+  }
+  catch (Exception $e) {
+    $output = '';
+    watchdog('Quiz', $e->getMessage());
+  }
+  return $output;
 }
 
 /**
  * Form for managing what questions should be added to a quiz with categorized
  * random questions.
- *
+ * @param $form
  * @param array $form_state
  *  The form state array.
  * @param object $quiz
  *  The quiz node.
+ *
+ * @return array
  */
 function quiz_categorized_form($form, $form_state, $quiz) {
   $form = array();
@@ -410,7 +436,7 @@ function _quiz_categorized_existing_terms_form(&$form, $form_state, $quiz) {
   $terms = _quiz_get_terms($quiz->vid);
   if ($terms) {
     if (empty($form_state['input']) && !_quiz_build_categorized_question_list($quiz)) {
-      drupal_set_message(t('There are not enough questions in the requested categories.'), 'error');
+      backdrop_set_message(t('There are not enough questions in the requested categories.'), 'error');
     }
   }
   foreach ($terms as $term) {
@@ -446,6 +472,10 @@ function _quiz_categorized_existing_terms_form(&$form, $form_state, $quiz) {
  * Form for adding new terms to a quiz.
  *
  * @see quiz_categorized_form
+ *
+ * @param $form
+ * @param $form_state
+ * @param $quiz
  */
 function _quiz_categorized_new_term_form(&$form, $form_state, $quiz) {
   $form['new'] = array(
@@ -477,6 +507,9 @@ function _quiz_categorized_new_term_form(&$form, $form_state, $quiz) {
 
 /**
  * Validate the categorized form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_categorized_form_validate($form, &$form_state) {
   if ($form_state['build_info']['args'][0]->changed > $form_state['values']['timestamp']) {
@@ -515,13 +548,17 @@ function quiz_categorized_form_validate($form, &$form_state) {
 
 /**
  * Submit the categorized form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_categorized_form_submit($form, $form_state) {
+  $config = config('quiz.settings');
   $quiz = node_load($form_state['values']['nid'], $form_state['values']['vid']);
   $quiz->number_of_random_questions = 0;
   // Update the refresh latest quizzes table so that we know what the users
   // latest quizzes are.
-  if (variable_get('quiz_auto_revisioning', 1)) {
+  if ($config->get('quiz_auto_revisioning')) {
     $is_new_revision = quiz_has_been_answered($quiz);
   }
   else {
@@ -543,6 +580,11 @@ function quiz_categorized_form_submit($form, $form_state) {
  * Update the categoriez belonging to a quiz with categorized random questions.
  *
  * Helper function for quiz_categorized_form_submit.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return int|mixed
  */
 function _quiz_categorized_update_terms(&$form, &$form_state) {
   $ids = array('weight', 'max_score', 'number');
@@ -565,7 +607,7 @@ function _quiz_categorized_update_terms(&$form, &$form_state) {
           $existing['weight'] = 1;
         }
         $changed[] = $form[$key]['name']['#markup'];
-        drupal_write_record('quiz_terms', $existing, array('vid', 'tid'));
+        backdrop_write_record('quiz_terms', $existing, array('vid', 'tid'));
         break;
       }
       elseif ($existing['remove']) {
@@ -579,10 +621,10 @@ function _quiz_categorized_update_terms(&$form, &$form_state) {
     }
   }
   if (!empty($changed)) {
-    drupal_set_message(t('Updates were made for the following terms: %terms', array('%terms' => implode(', ', $changed))));
+    backdrop_set_message(t('Updates were made for the following terms: %terms', array('%terms' => implode(', ', $changed))));
   }
   if (!empty($removed)) {
-    drupal_set_message(t('The following terms were removed: %terms', array('%terms' => implode(', ', $removed))));
+    backdrop_set_message(t('The following terms were removed: %terms', array('%terms' => implode(', ', $removed))));
   }
   return $num_questions;
 }
@@ -593,10 +635,10 @@ function _quiz_categorized_update_terms(&$form, &$form_state) {
  * This is a helper function for the submit function.
  */
 function _quiz_categorized_add_term($form, $form_state) {
-  drupal_set_message(t('The term was added'));
+  backdrop_set_message(t('The term was added'));
   // Needs to be set to avoid error-message from db:
   $form_state['values']['weight'] = 0;
-  drupal_write_record('quiz_terms', $form_state['values']);
+  backdrop_write_record('quiz_terms', $form_state['values']);
   return $form_state['values']['number'];
 }
 
@@ -628,7 +670,7 @@ function quiz_categorized_term_ahah($start) {
   foreach ($terms as $key => $value) {
     $to_json["$value (id:$key)"] = $value;
   }
-  drupal_json_output($to_json);
+  backdrop_json_output($to_json);
 }
 
 /**
@@ -745,7 +787,7 @@ function _quiz_add_fields_for_creating_questions(&$form, &$types, &$quiz) {
     '#collapsed' => TRUE,
   );
 
-  $url_query = drupal_get_destination();
+  $url_query = backdrop_get_destination();
   $url_query['quiz_nid'] = $quiz->nid;
   $url_query['quiz_vid'] = $quiz->vid;
   $create_question = FALSE;
@@ -914,7 +956,7 @@ function _quiz_add_questions_to_form(&$form, &$questions, &$quiz, &$question_typ
     $form[$fieldset]['view_links'][$id] = array(
       '#markup' => l(
         t('Edit'), 'node/' . $question->nid . '/edit', array(
-          'query' => drupal_get_destination(),
+          'query' => backdrop_get_destination(),
           'attributes' => array('class' => array('handle-changes')),
         )
       ),
@@ -954,6 +996,7 @@ function _quiz_add_questions_to_form(&$form, &$questions, &$quiz, &$question_typ
  *   Quiz node(object).
  */
 function _quiz_add_revision_checkbox(&$form, &$quiz) {
+  $config = config('quiz.settigs');
   // Recommend and preselect to create the quiz as a new revision if it already
   // has been answered.
   if (quiz_has_been_answered($quiz)) {
@@ -961,10 +1004,10 @@ function _quiz_add_revision_checkbox(&$form, &$quiz) {
     $rev_description = t('This quiz has been answered. To maintain correctness of existing answers and reports, changes should be saved as a new revision.');
   }
   else {
-    $rev_default = in_array('revision', variable_get('node_options_quiz', array()));
+    $rev_default = in_array('revision', $config->get('node_options_quiz'));
     $rev_description = t('Allow question status changes to create a new revision of the quiz?');
   }
-  if (user_access('manual quiz revisioning') && !variable_get('quiz_auto_revisioning', 1)) {
+  if (user_access('manual quiz revisioning') && !$config->get('quiz_auto_revisioning')) {
     $form['new_revision'] = array(
       '#type' => 'checkbox',
       '#default_value' => $rev_default,
@@ -982,6 +1025,9 @@ function _quiz_add_revision_checkbox(&$form, &$quiz) {
 
 /**
  * Validate that the supplied questions are real.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_questions_form_validate($form, $form_state) {
   if ($form_state['build_info']['args'][0]->changed > $form_state['values']['timestamp']) {
@@ -1010,7 +1056,7 @@ function quiz_questions_form_validate($form, $form_state) {
 
   foreach ($weight_map as $id => $weight) {
 
-    list($nid, $vid) = explode('-', $id, 2);
+    [$nid, $vid] = explode('-', $id, 2);
 
     // If a node isn't one of the questionstypes we remove it from the question
     // list.
@@ -1072,7 +1118,7 @@ function _quiz_update_items($quiz, $weight_map, $max_scores, $auto_update_max_sc
     if ($stayers[$id]) {
       continue;
     }
-    list($nid, $vid) = explode('-', $id, 2);
+    [$nid, $vid] = explode('-', $id, 2);
     $nid = (int) $nid;
     $vid = (int) $vid;
     $question = new stdClass();
@@ -1124,7 +1170,7 @@ function quiz_questions_form_submit($form, &$form_state) {
   $quiz = $form_state['build_info']['args'][0];
   // Update the refresh latest quizzes table so that we know what the users
   // latest quizzes are.
-  if (variable_get('quiz_auto_revisioning', 1)) {
+  if (config_get('quiz.settings','quiz_auto_revisioning')) {
     $is_new_revision = quiz_has_been_answered($quiz);
   }
   else {
@@ -1162,7 +1208,7 @@ function quiz_questions_form_submit($form, &$form_state) {
   // questions.
   if ($num_random > $assigned_random) {
     $num_random = $assigned_random;
-    drupal_set_message(t('The number of random questions for this @quiz have been lowered to %anum to match the number of questions you assigned.', array('@quiz' => QUIZ_NAME, '%anum' => $assigned_random), array('langcode' => 'warning')));
+    backdrop_set_message(t('The number of random questions for this @quiz have been lowered to %anum to match the number of questions you assigned.', array('@quiz' => QUIZ_NAME, '%anum' => $assigned_random), array('langcode' => 'warning')));
   }
 
   if ($quiz->type == 'quiz') {
@@ -1191,10 +1237,10 @@ function quiz_questions_form_submit($form, &$form_state) {
 
   if (isset($success) && isset($success2)) {
     entity_get_controller('node')->resetCache(array($quiz->nid));
-    drupal_set_message(t('Questions updated successfully.'));
+    backdrop_set_message(t('Questions updated successfully.'));
   }
   else {
-    drupal_set_message(t('There was an error updating the @quiz.', array('@quiz' => QUIZ_NAME)), 'error');
+    backdrop_set_message(t('There was an error updating the @quiz.', array('@quiz' => QUIZ_NAME)), 'error');
   }
 }
 
@@ -1245,8 +1291,9 @@ function _quiz_question_browser_submit($form, &$form_state) {
  * @param $id
  *   Identifier used in $sub_form
  *
- * @return table row
+ * @return array
  *   Array defining a table row
+ * @throws \Exception
  */
 function _quiz_get_question_row($sub_form, $id) {
   $question_types = quiz_get_question_types();
@@ -1254,8 +1301,8 @@ function _quiz_get_question_row($sub_form, $id) {
 
   $action = theme('item_list', array(
     'items' => array(
-      drupal_render($sub_form['view_links'][$id]),
-      '<SPAN CLASS="q-remove" STYLE="display:none">' . drupal_render($sub_form['remove_links'][$id]) . '</SPAN>',
+      backdrop_render($sub_form['view_links'][$id]),
+      '<SPAN CLASS="q-remove" STYLE="display:none">' . backdrop_render($sub_form['remove_links'][$id]) . '</SPAN>',
     ),
     'attributes' => array(
       'class' => array('links', 'inline'),
@@ -1264,22 +1311,22 @@ function _quiz_get_question_row($sub_form, $id) {
   $qnr_pid = $sub_form['qnr_pids'][$id]['#default_value'];
   $data_array = array(
     // The checkbox and the title.
-    ($qnr_pid ? theme('indentation', array('size' => 1)) : NULL) . drupal_render($sub_form['titles'][$id]),
+    ($qnr_pid ? theme('indentation', array('size' => 1)) : NULL) . backdrop_render($sub_form['titles'][$id]),
     $type,
     $action,
-    isset($sub_form['revision'][$id]) ? drupal_render($sub_form['revision'][$id]) : t("Up to date"),
-    drupal_render($sub_form['max_scores'][$id]),
-    drupal_render($sub_form['auto_update_max_scores'][$id]),
-    drupal_render($sub_form['stayers'][$id]),
+    isset($sub_form['revision'][$id]) ? backdrop_render($sub_form['revision'][$id]) : t("Up to date"),
+    backdrop_render($sub_form['max_scores'][$id]),
+    backdrop_render($sub_form['auto_update_max_scores'][$id]),
+    backdrop_render($sub_form['stayers'][$id]),
   );
   if (isset($sub_form['compulsories'])) {
-    $data_array[] = drupal_render($sub_form['compulsories'][$id]);
+    $data_array[] = backdrop_render($sub_form['compulsories'][$id]);
   }
-  $data_array[] = drupal_render($sub_form['weights'][$id]);
-  $data_array[] = drupal_render($sub_form['qnr_pids'][$id]);
+  $data_array[] = backdrop_render($sub_form['weights'][$id]);
+  $data_array[] = backdrop_render($sub_form['qnr_pids'][$id]);
   $data_array[] = array(
     'class' => array('tabledrag-hide'),
-    'data' => drupal_render($sub_form['qnr_ids'][$id]),
+    'data' => backdrop_render($sub_form['qnr_ids'][$id]),
   );
 
   $leaf_class = $sub_form['types'][$id]['#question_type'] != 'quiz_page' ? 'tabledrag-leaf' : '';
@@ -1295,13 +1342,15 @@ function _quiz_get_question_row($sub_form, $id) {
  * Adds inline js to automatically set the question's node title.
  */
 function quiz_set_auto_title() {
-  $max_length = variable_get('quiz_autotitle_length', 50);
-  drupal_add_js(array('quiz_max_length' => $max_length), array('type' => 'setting'));
-  drupal_add_js(drupal_get_path('module', 'quiz') . '/js/quiz.auto-title.js');
+  $max_length = config_get('quiz.settings','quiz_autotitle_length');
+  backdrop_add_js(array('quiz_max_length' => $max_length), array('type' => 'setting'));
+  backdrop_add_js(backdrop_get_path('module', 'quiz') . '/js/quiz.auto-title.js');
 }
 
 /**
  * Admin page for feedback settings.
+ *
+ * @return string
  */
 function quiz_feedback_page() {
   $rows = array();
@@ -1310,13 +1359,17 @@ function quiz_feedback_page() {
     $conditions = l(t('Conditions'), 'admin/quiz/feedback/manage/quiz_feedback_' . $key);
     $rows[] = array($time['name'], $time['description'], $conditions);
   }
-
-  return theme(
-    'table',
-    array(
-      'caption' => t('Quiz feedback conditions'),
-      'rows' => $rows,
-      'header' => $header
-    )
-  );
+  try {
+    $output = theme('table', array(
+        'caption' => t('Quiz feedback conditions'),
+        'rows' => $rows,
+        'header' => $header
+      )
+    );
+  }
+  catch (Exception $e) {
+    $output = '';
+    watchdog('Quiz', $e->getMessage());
+  }
+  return $output;
 }

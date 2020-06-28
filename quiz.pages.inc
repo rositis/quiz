@@ -10,21 +10,25 @@
  *
  * @param $result_id
  *  Result id.
+ *
+ * @return bool
  */
 function quiz_user_results($result_id) {
   $quiz_result = quiz_result_load($result_id);
-  $view = entity_view('quiz_result', array($quiz_result));
+  $view = entity_plus_view('quiz_result', array($quiz_result));
   if ($quiz_result->is_invalid) {
-    drupal_set_message(t('Your previous score on this @quiz was equal or better. This result will not be saved.', array('@quiz' => QUIZ_NAME)), 'warning');
+    backdrop_set_message(t('Your previous score on this @quiz was equal or better. This result will not be saved.', array('@quiz' => QUIZ_NAME)), 'warning');
   }
   return $view;
 }
 
 /**
  * Submit the report form.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_report_form_submit($form, &$form_state) {
-  global $user;
   $quiz_result = $form_state['quiz_result'];
   $quiz = node_load($quiz_result->nid, $quiz_result->vid);
 
@@ -50,7 +54,7 @@ function quiz_report_form_submit($form, &$form_state) {
 
     module_invoke_all('quiz_scored', $quiz, $score_data, $quiz_result->result_id);
 
-    drupal_set_message(t('The scoring data you provided has been saved.') . $add);
+    backdrop_set_message(t('The scoring data you provided has been saved.') . $add);
   }
 }
 
@@ -78,9 +82,11 @@ function _quiz_remove_unscored_message() {
 /**
  * Returns an array of score information for a quiz.
  *
- * @param unknown_type $result_id
- * @param unknown_type $quiz_vid
- * @param unknown_type $is_evaluated
+ * @param $result_id
+ * @param $quiz_vid
+ * @param $is_evaluated
+ *
+ * @return array
  */
 function quiz_get_score_array($result_id, $quiz_vid, $is_evaluated) {
   $properties = db_query('SELECT max_score, number_of_random_questions

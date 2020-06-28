@@ -3,7 +3,7 @@
 /**
  * Controller for a single quiz question response.
  */
-class QuizResultAnswerController extends EntityAPIController {
+class QuizResultAnswerController extends EntityPlusController {
 
   /**
    * Build the response content with feedback.

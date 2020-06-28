@@ -3,6 +3,30 @@
 class QuizResult extends Entity {
 
   /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return isset($this->id) ? $this->id : NULL;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'quiz_result';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {}
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {}
+
+  /**
    * Get the layout for this quiz result.
    *
    * The layout contains the questions to be delivered.
@@ -10,9 +34,9 @@ class QuizResult extends Entity {
    * @return QuizResultAnswer[]
    */
   public function getLayout() {
-    $layouts = drupal_static('quiz_result_layout', array());
+    $layouts = backdrop_static('quiz_result_layout', array());
 
-    if (!isset($layouts[$this->identifier()])) {
+    if (!isset($layouts[$this->id()])) {
       $quiz_node_relationships = entity_load('quiz_question_relationship', FALSE, array(
         'parent_nid' => $this->nid,
         'parent_vid' => $this->vid,
@@ -42,11 +66,11 @@ class QuizResult extends Entity {
           );
         }
         ksort($layout, SORT_NUMERIC);
-        $layouts[$this->identifier()] = $layout;
+        $layouts[$this->id()] = $layout;
       }
     }
 
-    return $layouts[$this->identifier()];
+    return $layouts[$this->id()];
   }
 
   /**
@@ -59,7 +83,7 @@ class QuizResult extends Entity {
     $user = user_load($this->uid);
 
     return t('@user\'s @quiz result in "@title"', array(
-      '@user' => format_username($user),
+      '@user' => user_format_name($user),
       '@quiz' => QUIZ_NAME, '@title' => $quiz->title,
     ));
   }

@@ -1,7 +1,13 @@
 <?php
 
-class QuizResultController extends EntityAPIController {
+class QuizResultController extends EntityPlusController {
 
+  /**
+   * @param $ids
+   * @param \DatabaseTransaction|null $transaction
+   *
+   * @throws \Exception
+   */
   public function delete($ids, \DatabaseTransaction $transaction = NULL) {
     foreach ($ids as $result_id) {
       // Fire the question types' implementations of question attempts deletion.
@@ -25,10 +31,11 @@ class QuizResultController extends EntityAPIController {
   /**
    * Save the Quiz result and do any post-processing to the result.
    *
-   * @param type $entity
-   * @param \DatabaseTransaction $transaction
+   * @param $entity
+   * @param \DatabaseTransaction|null $transaction
    *
-   * @return bool
+   * @return bool|int
+   * @throws \EntityStorageException
    */
   public function save($entity, \DatabaseTransaction $transaction = NULL) {
     if (empty($entity->time_start)) {
@@ -58,7 +65,13 @@ class QuizResultController extends EntityAPIController {
     }
 
     // Save the Quiz result.
-    parent::save($entity, $transaction);
+    try {
+      parent::save($entity, $transaction);
+    }
+    catch (Exception $e) {
+      watchdog('Quiz', $e->getMessage());
+    }
+
 
     // Post process the result.
     if ($new) {
@@ -70,12 +83,12 @@ class QuizResultController extends EntityAPIController {
       // Create question list.
       $questions = quiz_build_question_list($quiz);
       if ($questions === FALSE) {
-        drupal_set_message(t('Not enough random questions were found. Please add more questions before trying to take this @quiz.', array('@quiz' => QUIZ_NAME)), 'error');
+        backdrop_set_message(t('Not enough random questions were found. Please add more questions before trying to take this @quiz.', array('@quiz' => QUIZ_NAME)), 'error');
         return FALSE;
       }
 
       if (count($questions) == 0) {
-        drupal_set_message(t('No questions were found. Please !assign_questions before trying to take this @quiz.', array('@quiz' => QUIZ_NAME, '!assign_questions' => l(t('assign questions'), 'node/' . $quiz->nid . '/quiz/questions'))), 'error');
+        backdrop_set_message(t('No questions were found. Please !assign_questions before trying to take this @quiz.', array('@quiz' => QUIZ_NAME, '!assign_questions' => l(t('assign questions'), 'node/' . $quiz->nid . '/quiz/questions'))), 'error');
         return FALSE;
       }
 
@@ -91,7 +104,7 @@ class QuizResultController extends EntityAPIController {
           'number' => ++$i,
           'display_number' => $quizQuestion->isQuestion() ? ++$j : NULL,
         ));
-        entity_save('quiz_result_answer', $quiz_result_answer);
+        $quiz_result_answer->save();
       }
 
       if (!empty($entity->build_on_last)) {
@@ -110,6 +123,10 @@ class QuizResultController extends EntityAPIController {
    *
    * Note: the Quiz result does not have an actually exist - in that case, it
    * will return the first completed result found.
+   *
+   * @param $quiz_result
+   *
+   * @return bool
    */
   public static function findOldResult($quiz_result) {
     $efq = new EntityFieldQuery();
@@ -134,7 +151,7 @@ class QuizResultController extends EntityAPIController {
 
     if (!$entity->is_evaluated && empty($_POST)) {
       $msg = t('Parts of this @quiz have not been evaluated yet. The score below is not final.', array('@quiz' => QUIZ_NAME));
-      drupal_set_message($msg, 'warning');
+      backdrop_set_message($msg, 'warning');
     }
 
     $score = quiz_calculate_score($entity->result_id);

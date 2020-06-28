@@ -1,0 +1,18 @@
+{
+    "_config_name": "quiz.settings",
+    "quiz_max_result_options": 5,
+    "quiz_default_close": 30,
+    "quiz_use_passfail": 1,
+    "quiz_auto_revisioning": 1,
+    "quiz_durod": 0,
+    "quiz_pager_start": 100,
+    "quiz_has_timer": 0,
+    "quiz_name": "Quiz",
+    "quiz_remove_partial_quiz_record": 0,
+    "quiz_remove_invalid_quiz_record": 86400,
+    "quiz_index_questions": 1,
+    "quiz_autotitle_length": 50,
+    "quiz_pager_siblings": 5,
+    "quiz_time_limit_buffer": 5,
+    "node_options_quiz": []
+}

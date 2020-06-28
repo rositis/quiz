@@ -65,6 +65,9 @@ function quiz_generate_form($form, $form_state) {
 
 /**
  * Submit callback for devel_generate support.
+ *
+ * @param $form
+ * @param $form_state
  */
 function quiz_generate_form_submit($form, &$form_state) {
   module_load_include('inc', 'devel_generate', 'devel_generate.fields');
@@ -86,10 +89,12 @@ function quiz_generate_form_submit($form, &$form_state) {
  *
  * @todo associate results with random users
  *
- * @param type $quiz_type
- * @param type $question_types
- * @param type $question_limit
- * @param type $quiz_results
+ * @param $quiz_type
+ * @param $question_types
+ * @param $question_limit
+ * @param $quiz_results
+ *
+ * @throws \EntityStorageException
  */
 function quiz_generate($quiz_type, $question_types, $question_limit, $quiz_results) {
   $users = array_filter(devel_get_users());
@@ -137,8 +142,8 @@ function quiz_generate($quiz_type, $question_types, $question_limit, $quiz_resul
 /**
  * Generate Quiz questions.
  *
- * @param type $quiz
- * @param type $question_type
+ * @param $quiz
+ * @param $question_type
  */
 function quiz_generate_questions($quiz, $question_type) {
   $users = array_filter(devel_get_users());
