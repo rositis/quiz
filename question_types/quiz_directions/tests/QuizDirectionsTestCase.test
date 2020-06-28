@@ -11,6 +11,7 @@
 class QuizDirectionsTestCase extends QuizQuestionTestCase {
 
   var $question_node_type = 'quiz_directions';
+  var $admin;
 
   public static function getInfo() {
     return array(
@@ -26,18 +27,20 @@ class QuizDirectionsTestCase extends QuizQuestionTestCase {
 
   /**
    * Test adding and taking a quiz directions question.
+   *
+   * @param array $settings
+   *
+   * @return \Node
    */
   public function testCreateQuizQuestion($settings = array()) {
     // Login as our privileged user.
     $this->drupalLogin($this->admin);
 
-    $question_node = $this->drupalCreateNode(array(
+    return $this->drupalCreateNode(array(
       'type' => $this->question_node_type,
       'title' => 'QD 1 title',
       'body' => array(LANGUAGE_NONE => array(array('value' => 'QD 1 body text.'))),
     ) + $settings);
-
-    return $question_node;
   }
 
 }

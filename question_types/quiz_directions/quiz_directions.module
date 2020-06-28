@@ -8,13 +8,16 @@
  * the score.
  */
 
+
 /**
- * Implements hook_help().
+ * Implements hook_autolosd_info().
  */
-function quiz_directions_help($path, $args) {
-  if ($path == 'admin/help#quiz_directions') {
-    return t('Provides directions which can be inserted alongside questions in a quiz.');
-  }
+function quiz_directions_autoload_info() {
+  return array(
+    'QuizDirectionsQuestion' => 'includes/QuizDirectionsQuestion.class.inc',
+    'QuizDirectionsResponse' => 'includes/QuizDirectionsResponse.class.inc',
+    'QuizDirectionsTestCase' => 'tests/QuizDirectionsTestCase.inc',
+  );
 }
 
 /**
@@ -47,7 +50,7 @@ function quiz_directions_theme() {
   return array(
     'quiz_directions_answering_form' => array(
       'render element' => 'form',
-      'path' => drupal_get_path('module', 'quiz_directions') . '/theme',
+      'path' => backdrop_get_path('module', 'quiz_directions') . '/theme',
       'template' => 'quiz-directions-answering-form',
     ),
   );
