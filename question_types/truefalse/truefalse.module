@@ -16,7 +16,7 @@ function truefalse_autoload_info() {
   return array(
     'TrueFalseQuestion' => 'includes/TrueFalseQuestion.class.inc',
     'TrueFalseQuestionResponse' => 'includes/TrueFalseQuestionResponse.class.inc',
-    'TrueFalseTestCase' => 'tests/truefalse.inc',
+    'TrueFalseTestCase' => 'tests/truefalse.test',
   );
 }
 
@@ -24,7 +24,7 @@ function truefalse_autoload_info() {
  * Implements hook_config_info().
  */
 function truefalse_config_info() {
-  $prefixes['modulename.first_set_of.settings'] = array(
+  $prefixes['truefalse.settings'] = array(
     'label' => t('TrueFalse settings'),
     'group' => t('TrueFalse'),
   );

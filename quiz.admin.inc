@@ -4,7 +4,6 @@
  * @file
  * Administrator interface for Quiz module.
  */
-// QUIZ ADMIN.
 // Quiz Admin Settings.
 
 /**
@@ -14,7 +13,7 @@ function quiz_admin_settings($form, &$form_state) {
   $form = array();
   $config = config('quiz.settings');
 
-  $form['#config'] = 'modulename.settings';
+  // $form['#config'] = 'modulename.settings';
 
   $form['quiz_global_settings'] = array(
     '#type' => 'fieldset',
@@ -154,7 +153,7 @@ function quiz_admin_settings($form, &$form_state) {
   );
 
   $links = array(
-    '!jquery_countdown' => l(t('JQuery Countdown'), 'http://backdrop.org/project/jquery_countdown', $target),
+    '!jquery_countdown' => l(t('JQuery Countdown'), 'https://backdrop.org/project/jquery_countdown', $target),
   );
 
   $form['quiz_addons'] = array(
@@ -645,7 +644,7 @@ function _quiz_categorized_add_term($form, $form_state) {
 /**
  * Searches for an id in the end of a string.
  *
- * Id should be written like "(id:23)".
+ * ID should be written like "(id:23)".
  *
  * @param string $string
  *   The string where we will search for an id.
@@ -659,7 +658,7 @@ function _quiz_get_id_from_string($string) {
 }
 
 /**
- * Ahah function for finding terms...
+ * AHAH function for finding terms.
  *
  * @param string $start
  *   The start of the string we are looking for.
@@ -674,7 +673,7 @@ function quiz_categorized_term_ahah($start) {
 }
 
 /**
- * Helper function for finding terms...
+ * Helper function for finding terms.
  *
  * @param string $start
  *   The start of the string we are looking for.

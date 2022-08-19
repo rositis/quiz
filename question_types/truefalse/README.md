@@ -1,5 +1,5 @@
 True/False
-==================
+==========
 
 True/False question type for the quiz module.
 

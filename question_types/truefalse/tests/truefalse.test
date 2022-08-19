@@ -12,14 +12,6 @@ class TrueFalseTestCase extends QuizQuestionTestCase {
 
   var $question_node_type = 'truefalse';
 
-  public static function getInfo() {
-    return array(
-      'name' => t('True/False'),
-      'description' => t('Unit test for true or false question type.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   public function setUp($modules = array(), $admin_permissions = array(), $user_permissions = array()) {
     parent::setUp(array('truefalse'));
   }

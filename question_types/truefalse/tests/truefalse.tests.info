@@ -1,0 +1,4 @@
+[TrueFalseTestCase]
+name = True/False
+description = Unit test for true or false question type.
+group = Quiz
