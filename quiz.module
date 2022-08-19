@@ -33,6 +33,7 @@ define('QUIZ_KEEP_ALL', 2);
  */
 function quiz_autoload_info() {
   return array(
+    // Classes
     'Quiz'                    => 'includes/Quiz.class.inc',
     'QuizController'          => 'includes/QuizController.class.inc',
     'QuizMetadataController'  => 'includes/QuizMetadataController.class.inc',
@@ -50,6 +51,7 @@ function quiz_autoload_info() {
     'quiz_views_handler_filter_quiz_question' => 'includes/views/handlers/quiz_views_handler_filter_quiz_question.inc',
     'quiz_views_handler_filter_quiz_question_type' => 'includes/views/handlers/quiz_views_handler_filter_quiz_question_type.inc',
     'quiz_views_handler_field_quiz_question_result_answer' => 'includes/views/handlers/quiz_views_handler_field_quiz_question_result_answer.inc',
+    // Tests
     'QuizAccessTestCase'      => 'tests/QuizAccessTestCase.test',
     'QuizCreationTestCase'    => 'tests/QuizCreationTestCase.test',
     'QuizFeedbackTestCase'    => 'tests/QuizFeedbackTestCase.test',
@@ -86,7 +88,7 @@ function quiz_views_api() {
   );
 }
 
-/**
+/** TODO: REPLACE CTOOLS DEPENDENCIES
  * Implements hook_ctools_plugin_directory().
  *
  * Let the system know where our task and task_handler plugins are.
@@ -100,7 +102,7 @@ function quiz_ctools_plugin_directory($owner, $plugin_type) {
   }
 }
 
-/**
+/** TODO: REPLACE CTOOLS DEPENDENCIES
  * Implements hook_ctools_plugin_api().
  */
 function quiz_ctools_plugin_api($module, $api) {
@@ -212,7 +214,7 @@ function quiz_admin_paths() {
   );
 }
 
-/**
+/** TODO: ADAPT TO NO LONGER USE Role ID (rid)
  * Helper function to determine if a user has access to the different results
  * pages.
  *
@@ -256,7 +258,7 @@ function quiz_access_results($quiz, $quiz_result = NULL) {
 }
 
 /**
- * Helper function to determine if a user has access to view his quiz results.
+ * Helper function to determine if a user has access to view their quiz results.
  *
  * @param object $quiz
  *  The Quiz node.

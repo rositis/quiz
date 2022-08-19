@@ -4,6 +4,8 @@
  * This plugin array is more or less self documenting.
  */
 
+// TODO: Replace CTools dependencies.
+
 $plugin = array(
   // The title in the admin.
   'title' => t('@quiz Pane: Take', array('@quiz' => QUIZ_NAME)),

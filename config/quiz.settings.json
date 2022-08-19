@@ -1,5 +1,6 @@
 {
     "_config_name": "quiz.settings",
+    "comment_quiz": 0,
     "quiz_max_result_options": 5,
     "quiz_default_close": 30,
     "quiz_use_passfail": 1,
@@ -14,5 +15,6 @@
     "quiz_autotitle_length": 50,
     "quiz_pager_siblings": 5,
     "quiz_time_limit_buffer": 5,
-    "node_options_quiz": []
+    "node_options_quiz": [],
+    "theme_settings": [],
 }

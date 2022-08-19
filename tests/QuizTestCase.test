@@ -85,8 +85,8 @@ abstract class QuizTestCase extends DrupalWebTestCase {
 
     // Enable default permissions for system roles.
     $filtered_html_permission = filter_permission_name($filtered_html_format);
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array($filtered_html_permission));
-    user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array($filtered_html_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array($filtered_html_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array($filtered_html_permission));
 
     $admin_permissions[] = 'administer quiz configuration';
     $admin_permissions[] = 'create quiz content';
@@ -95,6 +95,7 @@ abstract class QuizTestCase extends DrupalWebTestCase {
     $admin_permissions[] = 'access quiz';
     $user_permissions[] = 'access quiz';
 
+    // TODO: Investigate method drupalCreateUser in the DrupalTestWebCase.
     $this->admin = $this->drupalCreateUser(array_unique($admin_permissions));
     $this->user = $this->drupalCreateUser(array_unique($user_permissions));
   }
@@ -116,14 +117,12 @@ abstract class QuizTestCase extends DrupalWebTestCase {
     $settings += array(
       'type' => 'quiz',
       'result_type' => 'quiz_result',
-      'review_options' => array('end' => drupal_map_assoc(array_keys(quiz_get_feedback_options()))),
+      'review_options' => array('end' => backdrop_map_assoc(array_keys(quiz_get_feedback_options()))),
     );
     return $this->drupalCreateNode($settings);
   }
 
-  public function testQuizNodeSettings() {
-
-  }
+  public function testQuizNodeSettings() {}
 
   public function quizDeleteAllResults() {
     db_query('DELETE FROM {quiz_node_results}');

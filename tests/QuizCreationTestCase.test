@@ -16,14 +16,6 @@ class QuizCreationTestCase extends QuizTestCase {
     parent::setUp($modules, $admin_permissions, $user_permissions);
   }
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz creation'),
-      'description' => t('Unit test for Quiz creation.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   /**
    * Test basic quiz creation.
    */

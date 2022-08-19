@@ -2,14 +2,6 @@
 
 class QuizQuestionNumbering extends QuizTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz question numbering'),
-      'description' => t('Unit test for Quiz question numbering.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   public function setUp($modules = array(), $admin_permissions = array(), $user_permissions = array()) {
     $modules[] = 'truefalse';
     $modules[] = 'quiz_directions';

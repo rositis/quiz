@@ -9,7 +9,7 @@ dependencies[] = filter
 dependencies[] = rules
 dependencies[] = token
 dependencies[] = views
-dependencies[] = views_bulk_operations
+; dependencies[] = views_bulk_operations ; Is VBO available yet? (rositis -8/18/22)
 
 test_dependencies[] = taxonomy
 test_dependencies[] = views

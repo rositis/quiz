@@ -16,14 +16,6 @@ class QuizFeedbackTestCase extends QuizTestCase {
     parent::setUp($modules);
   }
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz feedback'),
-      'description' => t('Unit test for Quiz feedback.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   /**
    * Test question feedback.
    *

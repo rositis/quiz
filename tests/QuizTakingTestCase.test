@@ -2,14 +2,6 @@
 
 class QuizTakingTestCase extends QuizTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz taking'),
-      'description' => t('Unit test for Quiz take behaviors.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   public function setUp($modules = array(), $admin_permissions = array(), $user_permissions = array()) {
     $modules[] = 'multichoice';
     $modules[] = 'quiz_directions';

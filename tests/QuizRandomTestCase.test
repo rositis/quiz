@@ -8,14 +8,6 @@
  */
 class QuizRandomTestCase extends QuizTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz random'),
-      'description' => t('Unit test for random quiz question behavior'),
-      'group' => t('Quiz'),
-    );
-  }
-
   public function setUp($modules = array(), $admin_permissions = array(), $user_permissions = array()) {
     $modules[] = 'quiz_page';
     $modules[] = 'truefalse';

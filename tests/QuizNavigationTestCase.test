@@ -15,14 +15,6 @@ class QuizNavigationTestCase extends QuizTestCase {
     parent::setUp($modules);
   }
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz navigation'),
-      'description' => t('Unit test for Quiz navigation.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   /**
    * Test the question navigation and access.
    */

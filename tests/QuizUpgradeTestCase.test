@@ -20,14 +20,6 @@ class QuizUpgradeTestCase extends UpdatePathTestCase {
     'field',
   );
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz upgrade'),
-      'description' => t('Test an upgrade from various Quiz versions.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   /**
    * We have a modified set up here, so that we can run multiple upgrade tests.
    */

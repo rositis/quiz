@@ -1,0 +1,54 @@
+[QuizAccessTestCase]
+name = Quiz access
+description = Unit test for Quiz access.
+group = Quiz
+
+[QuizCreationTestCase]
+name = Quiz creation
+description = Unit test for Quiz creation.
+group = Quiz
+
+[QuizFeedbackTestCase]
+name = Quiz feedback
+description = Unit test for Quiz feedback.
+group = Quiz
+
+[QuizGradingTestCase]
+name = Quiz grading
+description = Unit test for Quiz grading.
+group = Quiz
+
+[QuizNavigationTestCase]
+name = Quiz navigation
+description = Unit test for Quiz navigation.
+group = Quiz
+
+[QuizQuestionNumberingTestCase]
+name = Quiz question numbering
+description = Unit test for Quiz question numbering.
+group = Quiz
+
+[QuizRandomTestCase]
+name = Quiz random
+description' = Unit test for random quiz question behavior'
+group = Quiz
+
+[QuizResultTestCase]
+name = Quiz results
+description = Unit test for Quiz results.
+group = Quiz
+
+[QuizTakingTestCase]
+name = Quiz taking
+description = Unit test for Quiz take behaviors.
+group = Quiz
+
+[QuizTimerTestCase]
+name = Quiz timer
+description = Unit test for Quiz and question timer behaviors.
+group = Quiz
+
+[QuizUpgradeTestCase]
+name = Quiz upgrade
+description = Test an upgrade from various Quiz versions.
+group = Quiz

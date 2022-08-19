@@ -1,6 +1,6 @@
 Quiz
-======================
-The Quiz module lets you create graded assessments in Drupal. A Quiz is given as
+====
+The Quiz module lets you create graded assessments in Backdrop. A Quiz is given as
 a series of questions. Answers are then stored in the database. Scores and
 results are displayed during or after the quiz. Administrators can provide
 automatic or manual feedback. See all the features below! This module can be
@@ -97,7 +97,7 @@ in #drupal-course (for Quiz, Course, Certificate module support)
 Documentation
 -------------
 Additional documentation is located in the Wiki:
-https://github.com/backdrop-contrib/invite/wiki/Documentation.
+https://github.com/backdrop-contrib/quiz/wiki/Documentation.
 
 Issues
 ------

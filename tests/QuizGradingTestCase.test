@@ -10,14 +10,6 @@
  */
 class QuizGradingTestCase extends QuizTestCase {
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz grading'),
-      'description' => t('Unit test for Quiz grading.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   public function setUp($modules = array(), $admin_permissions = array(), $user_permissions = array()) {
     $modules[] = 'truefalse';
     $modules[] = 'short_answer';

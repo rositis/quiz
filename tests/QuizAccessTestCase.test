@@ -15,14 +15,6 @@ class QuizAccessTestCase extends QuizTestCase {
     parent::setUp($modules, $admin_permissions, $user_permissions);
   }
 
-  public static function getInfo() {
-    return array(
-      'name' => t('Quiz access'),
-      'description' => t('Unit test for Quiz access.'),
-      'group' => t('Quiz'),
-    );
-  }
-
   /**
    * Test quiz authors being able to score results for own quiz.
    */
