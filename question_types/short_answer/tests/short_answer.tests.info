@@ -1,0 +1,4 @@
+[ShortAnswerTestCase]
+name = Short answer
+description = Unit test for Short answers question type.
+group = Quiz
