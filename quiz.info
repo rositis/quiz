@@ -7,7 +7,6 @@ backdrop = 1.x
 dependencies[] = entity_plus
 dependencies[] = filter
 dependencies[] = rules
-dependencies[] = token
 dependencies[] = views
 ; dependencies[] = views_bulk_operations ; Is VBO available yet? (rositis -8/18/22)
 

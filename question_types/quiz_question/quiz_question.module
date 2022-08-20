@@ -1033,7 +1033,7 @@ function quiz_question_entity_info() {
       ),
       'label' => 'Quiz question properties',
       'metadata controller class' => 'QuizQuestionMetadataController',
-      'views controller class' => 'EntityDefaultViewsController',
+      'views controller class' => 'EntityPlusDefaultViewsController',
     ),
   );
 }

@@ -3508,7 +3508,7 @@ function quiz_entity_info() {
       ),
       'label' => 'Quiz properties',
       'metadata controller class' => 'QuizMetadataController',
-      'views controller class' => 'EntityDefaultViewsController',
+      'views controller class' => 'EntityPlusDefaultViewsController',
     ),
     'quiz_question_relationship' => array(
       'base table' => 'quiz_node_relationship',
@@ -3519,7 +3519,7 @@ function quiz_entity_info() {
       ),
       'label' => 'Quiz question relationship',
       'metadata controller class' => 'QuizQuestionRelationshipMetadataController',
-      'views controller class' => 'EntityDefaultViewsController',
+      'views controller class' => 'EntityPlusDefaultViewsController',
     ),
     'quiz_result' => array(
       'base table' => 'quiz_node_results',
@@ -3537,7 +3537,7 @@ function quiz_entity_info() {
       'label' => 'Quiz result',
       'label callback' => 'entity_class_label',
       'metadata controller class' => 'QuizResultMetadataController',
-      'views controller class' => 'EntityDefaultViewsController',
+      'views controller class' => 'EntityPlusDefaultViewsController',
       'access callback' => 'quiz_result_access',
     ),
     'quiz_result_answer' => array(
@@ -3559,7 +3559,7 @@ function quiz_entity_info() {
       'fieldable' => TRUE,
       'label' => 'Quiz result answer',
       'metadata controller class' => 'QuizResultAnswerMetadataController',
-      'views controller class' => 'EntityDefaultViewsController',
+      'views controller class' => 'EntityPlusDefaultViewsController',
     ),
   );
 
