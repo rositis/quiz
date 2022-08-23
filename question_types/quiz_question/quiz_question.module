@@ -408,14 +408,14 @@ function quiz_question_quiz_question_score($quiz, $question_nid, $question_vid =
  * @param $form
  * @param $context
  *
- * @return mixed
+ * @return array
  */
 function quiz_question_config($form, $context) {
   $q_types = quiz_question_get_info();
   $form = array();
-  $form['#config'] = 'modulename.settings';
+  $form['#config'] = 'quiz_question.settings';
   $form['#validate'] = array();
-  // Go through all question types and merge their config forms.
+  // Go through all the question types and merge their config forms.
   foreach ($q_types as $type => $values) {
     $function = $type . '_quiz_question_config';
     if (function_exists($function) && $admin_form = $function()) {
@@ -483,7 +483,8 @@ function quiz_question_node_insert(stdClass $node) {
  * Remove questions from search.
  */
 function quiz_question_query_alter(QueryAlterableInterface $query) {
-  if (!variable_get('quiz_index_questions')) {
+  $config = config('quiz_question.settings');
+  if ($config->get('quiz_index_questions') == 0) {
     if ($types = array_keys(quiz_question_get_info())) {
       $tables = $query->getTables();
       foreach ($tables as $table) {

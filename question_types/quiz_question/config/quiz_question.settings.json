@@ -1,3 +1,5 @@
 {
-    "_config_name": "quiz_question.settings"
+    "_config_name": "quiz_question.settings",
+    "quiz_index_questions" : 0
+
 }

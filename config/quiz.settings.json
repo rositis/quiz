@@ -16,5 +16,7 @@
     "quiz_pager_siblings": 5,
     "quiz_time_limit_buffer": 5,
     "node_options_quiz": [],
-    "theme_settings": []
+    "theme_settings": [],
+    "quiz_quiztake_disabled": 1,
+    "page_manager_override_anyway": 0
 }
