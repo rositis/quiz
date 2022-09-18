@@ -3496,6 +3496,8 @@ function _quiz_show_finish_button($quiz) {
 
 /**
  * Implements hook_entity_info().
+ *
+ * TODO: See how this jives with hook_schema() in Backdrop.
  */
 function quiz_entity_info() {
   $entity_info = array(
@@ -3569,11 +3571,11 @@ function quiz_entity_info() {
       'entity class' => 'Entity',
       'plural label' => t('Quiz result types'),
       'description' => t('Quiz result types.'),
-      'controller class' => 'EntityAPIControllerExportable',
+      // 'controller class' => 'EntityAPIControllerExportable',
       'base table' => 'quiz_result_type',
       'fieldable' => FALSE,
       'bundle of' => 'quiz_result',
-      'exportable' => TRUE,
+      // 'exportable' => TRUE, // Throws an error in Backdrop. Uses config files, not exportable Features.
       'entity keys' => array(
         'id' => 'id',
         'name' => 'type',
@@ -3614,7 +3616,7 @@ function quiz_entity_info() {
  * Shortcut to entity_load_single().
  */
 function quiz_result_load($result_id) {
-  return entity_load_single('quiz_result', $result_id);
+  return entity_load_single('quiz_result', $result_id); // TODO: What to do here?
 }
 
 /**

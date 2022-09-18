@@ -785,7 +785,9 @@ function quiz_update_last_removed() {
  * Implements hook_uninstall().
  */
 function quiz_uninstall() {
+  /* DEPRECATED because Backdrop doesn't use variables in the same way.
   db_delete('variable')
     ->condition('name', "quiz_%", 'like')
     ->execute();
+  */
 }
